@@ -12,7 +12,16 @@ Talk to any trainer you have already beaten and they challenge you to a rematch,
 
 If the rematch team averages **more than 10 levels above your party**, they warn you first in their own voice and ask again — say YES to battle anyway, or NO to walk away.
 
-Gym leaders, rivals and other scripted encounters keep their original conversations — except that a class which marks a dedicated rematch team (a `rematchIndex` in its trainer record, like the Yellow Legacy Changes mod ships for the gym leaders, Elite Four and Champion) uses that team for the rematch instead of the trainer's own party.
+Gym leaders, rivals and other scripted encounters keep their original conversations — except that a class which marks a dedicated rematch team (a `rematchIndex` in its trainer record) uses that team for the rematch instead of the trainer's own party.
+
+## Yellow Legacy rematch teams
+
+To rematch the gym leaders, the Elite Four and the Champion with their
+far stronger rematch teams, install
+**[Yellow Legacy Changes](https://github.com/ShaneMcGovernIE/yellow_legacy_changes)
+alongside this mod** — it marks the hack's L64-77 teams with
+`rematchIndex`, and this mod picks them up automatically (with the
+strength warning when the gap is large).
 
 ## Try it
 
