@@ -152,11 +152,19 @@ return function(mod)
     end
 
     local function accept()
+      -- a mod may ship a dedicated rematch team for the class: the
+      -- trainer record's rematchIndex points at it (Yellow Legacy Changes
+      -- appends the hack's L64-77 rematch teams this way).  Fall back to
+      -- the trainer's own party when none is marked.
+      local record = game.data.trainers and game.data.trainers[d.trainerClass]
+      local marked = record and record.rematchIndex
+      local partyIndex = marked and record.parties and record.parties[marked]
+          and marked or d.trainerParty
       Runtime.emit("world.trainer_engaged", { npc = npc,
-        trainerClass = d.trainerClass, partyIndex = d.trainerParty })
+        trainerClass = d.trainerClass, partyIndex = partyIndex })
       local header = game.data:trainerHeader(self.map.def.label, d.index)
       local wonText = header and header.won and game.data.text[header.won]
-      local battle = BattleState.newTrainer(game, d.trainerClass, d.trainerParty)
+      local battle = BattleState.newTrainer(game, d.trainerClass, partyIndex)
       battle.rematch = true
       battle.endBattleText = wonText and TextBox.substitute(game, wonText) or nil
       battle.onFinish = function(result)

@@ -226,5 +226,28 @@ battleStateStub.finish(pay2)
 T.eq(pay2.paid, 500, "pay day pays normally")
 T.eq(game.save.money, moneyBefore + 500, "money credited normally")
 
+-- K: a class with a marked rematch team (the Yellow Legacy pattern) uses
+-- that party for the rematch instead of the trainer's own
+Data.trainers["OPP_FIX_MISTY"] = {
+  id = "OPP_FIX_MISTY", name = "MISTY", index = 35, baseMoney = 40,
+  parties = {
+    { { level = 18, species = "STARYU" }, { level = 21, species = "STARMIE" } },
+    { { level = 64, species = "SEADRA" }, { level = 65, species = "STARMIE" } },
+  },
+  rematchIndex = 2,
+}
+local mistyBattles = #calls.battles
+local pushedBefore = #pushed
+local mistyNpc = freshNpc()
+mistyNpc.def.trainerClass = "OPP_FIX_MISTY"
+overworldStub.talkTo(ow, mistyNpc)
+T.eq(#pushed, pushedBefore + 1, "the rematch prompt is pushed")
+pushed[#pushed].opts.choice(true)
+T.eq(#calls.battles, mistyBattles + 1, "one battle created")
+T.eq(calls.battles[#calls.battles].party, 2,
+  "the marked rematch team is used")
+T.eq(calls.battles[#calls.battles].battle.rematch, true,
+  "the marked-rematch battle is still a rematch")
+
 run.release()
 T.finish("trainer_rematch")

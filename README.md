@@ -10,7 +10,7 @@ Talk to any trainer you have already beaten and they challenge you to a rematch,
    - **YES** - battle them again. The rematch pays **no money**: no trainer prize and no Pay Day pickup.
    - **NO** - they react in character: cocky classes mock you for being scared, wise ones are understanding. Their normal post-battle line still follows, so nothing from the base game is lost.
 
-Gym leaders, rivals and other scripted encounters keep their original conversations.
+Gym leaders, rivals and other scripted encounters keep their original conversations — except that a class which marks a dedicated rematch team (a `rematchIndex` in its trainer record, like the Yellow Legacy Changes mod ships for the gym leaders, Elite Four and Champion) uses that team for the rematch instead of the trainer's own party.
 
 ## Try it
 
