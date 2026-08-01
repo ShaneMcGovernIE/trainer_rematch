@@ -1,0 +1,25 @@
+-- Sharing metadata for the manager detail pane.
+return {
+  summary = "Beat a trainer, then talk to them again for a rematch -- paid in pride, not money.",
+  author = "shanemcgovern",
+  tags = { "gameplay", "trainers", "rematch" },
+  differences = {
+    changed = {
+      "Talking to a defeated field trainer now offers a rematch with a YES/NO prompt",
+      "Rematch battles award no money: no trainer prize, no Pay Day pickup",
+      "Saying NO makes the trainer react: cocky classes mock you, wise classes answer with understanding",
+    },
+    added = {
+      "A unique rematch opening line for every trainer class, written in the class's own voice",
+      "A unique decline line for every trainer class",
+    },
+    known = {
+      "Scripted encounters (gym leaders, rivals, story fights) keep their original flows",
+      "The trainer's vanilla post-battle dialogue still follows the decline reaction",
+    },
+  },
+  credits = {
+    { who = "Pokemon Gen 1 Recompilation Project", for_ = "the engine and its mod seams" },
+  },
+  compat = { engine = ">=0.0.0 <2.0.0", modApi = 2 },
+}

@@ -1,0 +1,21 @@
+{
+  "id": "trainer_rematch",
+  "name": "Trainer Rematch",
+  "version": "0.1.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "GAMEPLAY",
+  "priority": 100,
+  "permissions": [
+    "engine_internals"
+  ],
+  "dependencies": [],
+  "optional_dependencies": [],
+  "conflicts": [],
+  "incompatible": [],
+  "experimental": false,
+  "description": "Talk to beaten trainers for a rematch. Rematches pay no money, and every trainer class opens with a line in its own voice.",
+  "github": "ShaneMcGovernIE/trainer_rematch"
+}
