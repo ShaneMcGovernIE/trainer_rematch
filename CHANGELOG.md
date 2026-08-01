@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.0] - 2026-08-01
+
+### Added
+
+- Strength warning: when the rematch team averages more than 10 levels
+  above the player's party, the trainer warns in its own voice ("My team
+  is far stronger than yours...") and asks a second time before the battle
+  starts.  Declining walks away with the class's usual decline line.
+
 ## [0.2.0] - 2026-08-01
 
 ### Added

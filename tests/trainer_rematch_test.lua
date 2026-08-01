@@ -51,7 +51,8 @@ local pushed = {}
 local calls = { vanillaTalk = 0, engaged = 0, battles = {}, after = 0 }
 local game = {
   data = Data,
-  save = { money = 3000, defeatedTrainers = {}, player = { name = "RED" } },
+  save = { money = 3000, defeatedTrainers = {}, player = { name = "RED" },
+           party = { { level = 5 }, { level = 6 }, { level = 7 } } },
   stack = { push = function(_, s) table.insert(pushed, s) end },
 }
 local textBoxStub = {
@@ -227,7 +228,9 @@ T.eq(pay2.paid, 500, "pay day pays normally")
 T.eq(game.save.money, moneyBefore + 500, "money credited normally")
 
 -- K: a class with a marked rematch team (the Yellow Legacy pattern) uses
--- that party for the rematch instead of the trainer's own
+-- that party for the rematch instead of the trainer's own -- and since
+-- the marked team averages far above the player's party, the class warns
+-- first and only battles after a second confirmation
 Data.trainers["OPP_FIX_MISTY"] = {
   id = "OPP_FIX_MISTY", name = "MISTY", index = 35, baseMoney = 40,
   parties = {
@@ -243,11 +246,44 @@ mistyNpc.def.trainerClass = "OPP_FIX_MISTY"
 overworldStub.talkTo(ow, mistyNpc)
 T.eq(#pushed, pushedBefore + 1, "the rematch prompt is pushed")
 pushed[#pushed].opts.choice(true)
-T.eq(#calls.battles, mistyBattles + 1, "one battle created")
+T.eq(#calls.battles, mistyBattles, "no battle yet: the warning comes first")
+T.eq(#pushed, pushedBefore + 2, "the strength warning is pushed")
+T.eq(pushed[#pushed].text, ex.resolveWarning("OPP_FIX_MISTY"),
+  "the warning speaks in the class's default voice")
+pushed[#pushed].opts.choice(true)
+T.eq(#calls.battles, mistyBattles + 1, "confirming the warning starts the battle")
 T.eq(calls.battles[#calls.battles].party, 2,
   "the marked rematch team is used")
 T.eq(calls.battles[#calls.battles].battle.rematch, true,
   "the marked-rematch battle is still a rematch")
+
+-- L: declining the warning walks away without a battle
+local lBefore = #calls.battles
+local pushedL = #pushed
+mistyNpc.frozen = false
+overworldStub.talkTo(ow, mistyNpc)
+pushed[#pushed].opts.choice(true)
+pushed[#pushed].opts.choice(false)
+T.eq(#calls.battles, lBefore, "declining the warning starts no battle")
+T.eq(#pushed, pushedL + 3, "the decline line follows")
+
+-- M: a small level gap skips the warning and battles directly
+local lvlBattles = #calls.battles
+local pushedM = #pushed
+local lvlNpc = freshNpc()
+overworldStub.talkTo(ow, lvlNpc)
+T.eq(#pushed, pushedM + 1, "the rematch prompt is pushed")
+pushed[#pushed].opts.choice(true)
+T.eq(#calls.battles, lvlBattles + 1, "a close team battles straight away")
+T.eq(calls.battles[#calls.battles].party, 1, "it uses the trainer's own party")
+
+-- N: the level-gap math behind the warning
+T.eq(ex.levelGap({ { level = 5 }, { level = 7 } },
+  { { level = 64 }, { level = 65 } }), 58.5, "the gap is team average minus party average")
+T.eq(ex.levelGap({ { level = 60 }, { level = 60 } },
+  { { level = 55 }, { level = 55 } }), -5, "an easier team is a negative gap")
+T.eq(ex.levelGap(nil, { { level = 64 } }), nil, "an empty party yields no gap")
+T.eq(ex.levelGap({ { level = 5 } }, nil), nil, "an empty team yields no gap")
 
 run.release()
 T.finish("trainer_rematch")

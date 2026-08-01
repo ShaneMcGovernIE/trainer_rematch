@@ -112,6 +112,52 @@ local REMATCH_DECLINES = {
 
 local DEFAULT_DECLINE = "Ha! Scared of\na rematch, are\nyou?"
 
+-- One line per trainer class for the "your team is far stronger" warning,
+-- spoken when the rematch team averages more than 10 levels above the
+-- player's party.  Same voice as the challenge lines: the class owns the
+-- warning.  Rows are the text box's lines (max 18 chars each).
+local REMATCH_WARNINGS = {
+  OPP_BROCK      = "Hm. My team is\nfar stronger than\nbefore. Are you\nsure?",
+  OPP_MISTY      = "My POKéMON have\ngrown far beyond\nyours. Really?",
+  OPP_LT_SURGE   = "Warning: my team\nis on another\nlevel. Still in?",
+  OPP_ERIKA      = "My flowers have\nbloomed past your\nteam's strength.\nStill sure?",
+  OPP_KOGA       = "My poison has\ngrown deadlier\nthan your team\ncan handle. Sure?",
+  OPP_BLAINE     = "The heat burns\nfar beyond your\nteam. Ready?",
+  OPP_SABRINA    = "I foresee your\nteam is far\nbehind mine. Are\nyou certain?",
+  OPP_LORELEI    = "My cold winds\nare far stronger\nthan your team.\nContinue?",
+  OPP_BRUNO      = "Hoo hah! My power\nis far beyond\nyours! Still\nsure?",
+  OPP_AGATHA     = "Heh heh. My\nghosts are far\nabove your team.\nSure about this?",
+  OPP_LANCE      = "My dragons tower\nfar above your\nteam. Do you\nreally wish to?",
+  OPP_RIVAL3     = "My team is far\nstronger than\nyours now. Sure?",
+}
+
+local DEFAULT_WARN = "My team is far\nstronger than\nyours. Are you\nsure?"
+
+local function resolveWarning(classId)
+  return REMATCH_WARNINGS[classId] or DEFAULT_WARN
+end
+
+-- How many levels the trainer's team averages above the player's party;
+-- nil when either side is empty, so callers can skip the warning.
+local function levelGap(playerParty, team)
+  if not team or #team == 0 then return nil end
+  local playerLevels, playerCount = 0, 0
+  if playerParty then
+    for _, mon in ipairs(playerParty) do
+      if mon and mon.level then
+        playerLevels = playerLevels + mon.level
+        playerCount = playerCount + 1
+      end
+    end
+  end
+  if playerCount == 0 then return nil end
+  local teamLevels = 0
+  for _, slot in ipairs(team) do
+    teamLevels = teamLevels + (slot.level or 0)
+  end
+  return (teamLevels / #team) - (playerLevels / playerCount)
+end
+
 local function resolveLine(classId)
   return REMATCH_LINES[classId] or DEFAULT_LINE
 end
@@ -129,6 +175,8 @@ end
 return function(mod)
   mod.exports.resolveLine = resolveLine
   mod.exports.resolveDecline = resolveDecline
+  mod.exports.resolveWarning = resolveWarning
+  mod.exports.levelGap = levelGap
   mod.exports.isPrizeLine = isPrizeLine
 
   local function offerRematch(self, npc, game, deps)
@@ -160,18 +208,35 @@ return function(mod)
       local marked = record and record.rematchIndex
       local partyIndex = marked and record.parties and record.parties[marked]
           and marked or d.trainerParty
-      Runtime.emit("world.trainer_engaged", { npc = npc,
-        trainerClass = d.trainerClass, partyIndex = partyIndex })
-      local header = game.data:trainerHeader(self.map.def.label, d.index)
-      local wonText = header and header.won and game.data.text[header.won]
-      local battle = BattleState.newTrainer(game, d.trainerClass, partyIndex)
-      battle.rematch = true
-      battle.endBattleText = wonText and TextBox.substitute(game, wonText) or nil
-      battle.onFinish = function(result)
-        self:afterBattle(result, battle)
-        unfreeze()
+      local team = record and record.parties and record.parties[partyIndex]
+
+      local function battle()
+        Runtime.emit("world.trainer_engaged", { npc = npc,
+          trainerClass = d.trainerClass, partyIndex = partyIndex })
+        local header = game.data:trainerHeader(self.map.def.label, d.index)
+        local wonText = header and header.won and game.data.text[header.won]
+        local b = BattleState.newTrainer(game, d.trainerClass, partyIndex)
+        b.rematch = true
+        b.endBattleText = wonText and TextBox.substitute(game, wonText) or nil
+        b.onFinish = function(result)
+          self:afterBattle(result, b)
+          unfreeze()
+        end
+        self:pushBattle(b)
       end
-      self:pushBattle(battle)
+
+      -- when the rematch team averages more than 10 levels above the
+      -- player's party, the class warns in its own voice and asks again
+      local gap = levelGap(game.save.party, team)
+      if gap and gap > 10 then
+        game.stack:push(TextBox.new(game, resolveWarning(d.trainerClass), nil, {
+          choice = function(yes)
+            if yes then battle() else decline() end
+          end,
+        }))
+      else
+        battle()
+      end
     end
 
     game.stack:push(TextBox.new(game, resolveLine(d.trainerClass), nil, {
