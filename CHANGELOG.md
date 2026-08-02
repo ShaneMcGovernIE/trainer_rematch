@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.1] - 2026-08-02
+
+### Changed
+
+- Rematch money now defaults to 0% (the original no-prize behaviour);
+  the percentage sliders are unchanged.
+
 ## [0.4.0] - 2026-08-02
 
 ### Added
