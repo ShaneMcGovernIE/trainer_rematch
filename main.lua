@@ -1,7 +1,7 @@
 -- Trainer Rematch: talk to a trainer you have already beaten to get a
 -- rematch.  Rematch battles award a percentage of the usual money and
 -- experience (MODS > Trainer Rematch: 0-100% in 10% steps; money
--- defaults to 25%, XP to 100%).  Each trainer class opens with a line in
+-- defaults to 0%, XP to 100%).  Each trainer class opens with a line in
 -- its own voice, matched to the personality that class shows in its
 -- regular dialogue.
 
@@ -182,12 +182,12 @@ return function(mod)
   mod.exports.isPrizeLine = isPrizeLine
 
   -- rematch earnings: a percentage of the usual battle money and
-  -- experience, stepped in 10% intervals.  Money defaults to 25% (a
-  -- rematch still pays something); XP defaults to 100%, so behaviour is
-  -- unchanged until the player moves the slider.
+  -- experience, stepped in 10% intervals.  Money defaults to 0% (the
+  -- original no-prize rematch behaviour); XP defaults to 100%, so
+  -- behaviour is unchanged until the player moves the slider.
   mod.options:define({
     { key = "rematchMoneyPct", type = "number", label = "REMATCH MONEY %",
-      min = 0, max = 100, step = 10, default = 25 },
+      min = 0, max = 100, step = 10, default = 0 },
     { key = "rematchXpPct", type = "number", label = "REMATCH XP %",
       min = 0, max = 100, step = 10, default = 100 },
   })
