@@ -1,12 +1,12 @@
 -- Sharing metadata for the manager detail pane.
 return {
-  summary = "Beat a trainer, then talk to them again for a rematch -- paid in pride, not money.",
+  summary = "Beat a trainer, then talk to them again for a rematch -- paid a configurable percentage of the usual prize.",
   author = "shanemcgovern",
   tags = { "gameplay", "trainers", "rematch" },
   differences = {
     changed = {
       "Talking to a defeated field trainer now offers a rematch with a YES/NO prompt",
-      "Rematch battles award no money: no trainer prize, no Pay Day pickup",
+      "Rematch money and XP are configurable percentages of the usual amounts (MODS menu, 0-100% in 10% steps; money defaults to 25%)",
       "Saying NO makes the trainer react: cocky classes mock you, wise classes answer with understanding",
     },
     added = {

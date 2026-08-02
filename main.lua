@@ -1,7 +1,9 @@
 -- Trainer Rematch: talk to a trainer you have already beaten to get a
--- rematch.  Rematch battles award no money.  Each trainer class opens
--- with a line in its own voice, matched to the personality that class
--- shows in its regular dialogue.
+-- rematch.  Rematch battles award a percentage of the usual money and
+-- experience (MODS > Trainer Rematch: 0-100% in 10% steps; money
+-- defaults to 25%, XP to 100%).  Each trainer class opens with a line in
+-- its own voice, matched to the personality that class shows in its
+-- regular dialogue.
 
 -- One line per trainer class, written in the class's voice.  The line
 -- leads straight into the YES/NO prompt, so every one reads as a
@@ -179,6 +181,17 @@ return function(mod)
   mod.exports.levelGap = levelGap
   mod.exports.isPrizeLine = isPrizeLine
 
+  -- rematch earnings: a percentage of the usual battle money and
+  -- experience, stepped in 10% intervals.  Money defaults to 25% (a
+  -- rematch still pays something); XP defaults to 100%, so behaviour is
+  -- unchanged until the player moves the slider.
+  mod.options:define({
+    { key = "rematchMoneyPct", type = "number", label = "REMATCH MONEY %",
+      min = 0, max = 100, step = 10, default = 25 },
+    { key = "rematchXpPct", type = "number", label = "REMATCH XP %",
+      min = 0, max = 100, step = 10, default = 100 },
+  })
+
   local function offerRematch(self, npc, game, deps)
     local d = npc.def
     local TextBox = deps.textBox or require("src.render.TextBox")
@@ -273,23 +286,46 @@ return function(mod)
       return vanillaTalkTo(self, npc)
     end
 
-    -- no money from a rematch: zero the class base money for this battle
-    -- only (never touch the shared data record) and drop the prize line
+    -- rematch money is a percentage of the usual prize (MODS > Trainer
+    -- Rematch, 0-100% in 10s): scale the class base money for this battle
+    -- only (never touch the shared data record), and at 0% drop the prize
+    -- line entirely so no "You got ¥0" box appears
     local vanillaFainted = BattleState.enemyMonFainted
     BattleState.enemyMonFainted = function(self, ...)
       if not self.rematch then return vanillaFainted(self, ...) end
       local realTrainer = self.trainer
-      self.trainer = setmetatable({ baseMoney = 0 }, { __index = realTrainer })
+      local pct = mod.options:get("rematchMoneyPct") or 0
+      self.trainer = setmetatable({
+        baseMoney = math.floor((realTrainer.baseMoney or 0) * pct / 100),
+      }, { __index = realTrainer })
       local realSayNext = self.sayNext
-      self.sayNext = function(s, text)
-        if isPrizeLine(text) then return end
-        return realSayNext(s, text)
+      if pct <= 0 then
+        self.sayNext = function(s, text)
+          if isPrizeLine(text) then return end
+          return realSayNext(s, text)
+        end
       end
       local ok, err = pcall(vanillaFainted, self, ...)
       self.trainer = realTrainer
       self.sayNext = realSayNext
       if not ok then error(err, 2) end
     end
+
+    -- rematch experience scales the same way (default 100%): the award
+    -- ctx's applyShare is the single funnel for participant and EXP.ALL
+    -- shares, so scaling there covers every gain path
+    mod.hooks:wrap("battle.exp_award", function(next, ctx)
+      if ctx and ctx.battle and ctx.battle.rematch then
+        local pct = mod.options:get("rematchXpPct")
+        if pct ~= nil and pct ~= 100 then
+          local apply = ctx.applyShare
+          ctx.applyShare = function(mon, amount, why)
+            return apply(mon, math.floor(amount * pct / 100), why)
+          end
+        end
+      end
+      return next(ctx)
+    end)
 
     -- Pay Day is a reward too: nothing to collect on a rematch
     local vanillaFinish = BattleState.finish

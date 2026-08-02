@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.0] - 2026-08-02
+
+### Added
+
+- Rematch earnings are now configurable in MODS > Trainer Rematch:
+  - **REMATCH MONEY %** - a percentage of the usual trainer prize money,
+    stepped in 10% intervals from 0% to 100% (default 25%).
+  - **REMATCH XP %** - a percentage of the usual experience gained,
+    stepped in 10% intervals from 0% to 100% (default 100%, unchanged
+    behaviour).
+- At 0% money the prize line is still suppressed (no "You got ¥0" box);
+  Pay Day remains disabled on rematches.
+
 ## [0.3.0] - 2026-08-01
 
 ### Added
