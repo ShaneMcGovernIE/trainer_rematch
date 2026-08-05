@@ -160,6 +160,24 @@ local function levelGap(playerParty, team)
   return (teamLevels / #team) - (playerLevels / playerCount)
 end
 
+-- a percentage of a whole, rounded down; nil-safe for callers that have
+-- no configured option yet
+local function scaleByPercent(value, pct)
+  return math.floor((value or 0) * (pct or 0) / 100)
+end
+
+-- a marked rematch team (rematchIndex) wins over the trainer's own party;
+-- fallback is the npc's usual party index
+local function resolvePartyIndex(record, fallback)
+  local marked = record and record.rematchIndex
+  if marked and record.parties and record.parties[marked] then return marked end
+  return fallback
+end
+
+local function resolveParty(record, index)
+  return record and record.parties and record.parties[index]
+end
+
 local function resolveLine(classId)
   return REMATCH_LINES[classId] or DEFAULT_LINE
 end
@@ -180,6 +198,9 @@ return function(mod)
   mod.exports.resolveWarning = resolveWarning
   mod.exports.levelGap = levelGap
   mod.exports.isPrizeLine = isPrizeLine
+  mod.exports.scaleByPercent = scaleByPercent
+  mod.exports.resolvePartyIndex = resolvePartyIndex
+  mod.exports.resolveParty = resolveParty
 
   -- rematch earnings: a percentage of the usual battle money and
   -- experience, stepped in 10% intervals.  Money defaults to 0% (the
@@ -218,10 +239,8 @@ return function(mod)
       -- appends the hack's L64-77 rematch teams this way).  Fall back to
       -- the trainer's own party when none is marked.
       local record = game.data.trainers and game.data.trainers[d.trainerClass]
-      local marked = record and record.rematchIndex
-      local partyIndex = marked and record.parties and record.parties[marked]
-          and marked or d.trainerParty
-      local team = record and record.parties and record.parties[partyIndex]
+      local partyIndex = resolvePartyIndex(record, d.trainerParty)
+      local team = resolveParty(record, partyIndex)
 
       local function battle()
         Runtime.emit("world.trainer_engaged", { npc = npc,
@@ -296,7 +315,7 @@ return function(mod)
       local realTrainer = self.trainer
       local pct = mod.options:get("rematchMoneyPct") or 0
       self.trainer = setmetatable({
-        baseMoney = math.floor((realTrainer.baseMoney or 0) * pct / 100),
+        baseMoney = scaleByPercent(realTrainer.baseMoney, pct),
       }, { __index = realTrainer })
       local realSayNext = self.sayNext
       if pct <= 0 then
@@ -311,18 +330,30 @@ return function(mod)
       if not ok then error(err, 2) end
     end
 
-    -- rematch experience scales the same way (default 100%): the award
-    -- ctx's applyShare is the single funnel for participant and EXP.ALL
-    -- shares, so scaling there covers every gain path
+    -- rematch experience scales the final gained EXP (default 100%).  The
+    -- award ctx's applyShare takes a participant split, and the gain
+    -- formula floors it through math.max(1, split): scaling that divisor
+    -- by a percentage hits the floor for the usual single-participant
+    -- battle (0% -> split 0 -> the max(1, .) guard restores full EXP).  The
+    -- exp.gain hook sees the finished amount, so the award wrap only marks
+    -- the battle as a rematch while vanilla runs and the exp.gain wrap does
+    -- the scaling.
+    local rematchXpPct
     mod.hooks:wrap("battle.exp_award", function(next, ctx)
-      if ctx and ctx.battle and ctx.battle.rematch then
-        local pct = mod.options:get("rematchXpPct")
-        if pct ~= nil and pct ~= 100 then
-          local apply = ctx.applyShare
-          ctx.applyShare = function(mon, amount, why)
-            return apply(mon, math.floor(amount * pct / 100), why)
-          end
-        end
+      local saved = rematchXpPct
+      rematchXpPct = ctx and ctx.battle and ctx.battle.rematch
+          and (mod.options:get("rematchXpPct") or 100) or nil
+      local ok, res = pcall(next, ctx)
+      rematchXpPct = saved
+      if not ok then error(res, 2) end
+      return res
+    end)
+    mod.hooks:wrap("exp.gain", function(next, ctx)
+      local pct = rematchXpPct
+      if pct and pct ~= 100 then
+        local gained = next(ctx)
+        if gained == nil then return nil end
+        return scaleByPercent(gained, pct)
       end
       return next(ctx)
     end)

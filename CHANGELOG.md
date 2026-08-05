@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.2] - 2026-08-05
+
+### Fixed
+
+- Rematch XP percentage now applies. The old wrap scaled the participant
+  split, which the engine floors back to 1 for the normal single-participant
+  rematch — so 0%-90% all paid full EXP. The finished EXP is now scaled
+  after the battle, and the flag can't leak into the next battle.
+- README and mod.card now state the rematch money default correctly (0%,
+  not 25%).
+
+### Changed
+
+- Pure `scaleByPercent` / `resolvePartyIndex` / `resolveParty` helpers
+  extracted from the money and party-selection paths and exported for
+  tests; the full `battle.exp_award` -> `exp.gain` path is now covered.
+
 ## [0.4.1] - 2026-08-02
 
 ### Changed

@@ -285,5 +285,50 @@ T.eq(ex.levelGap({ { level = 60 }, { level = 60 } },
 T.eq(ex.levelGap(nil, { { level = 64 } }), nil, "an empty party yields no gap")
 T.eq(ex.levelGap({ { level = 5 } }, nil), nil, "an empty team yields no gap")
 
+-- ------------------------------------------------ percentage scaling
+
+T.eq(ex.scaleByPercent(1500, 25), 375, "25% of a prize")
+T.eq(ex.scaleByPercent(150, 0), 0, "0% scales to zero")
+T.eq(ex.scaleByPercent(37, 50), 18, "the percent is floored")
+T.eq(ex.scaleByPercent(1000, 10), 100, "10% of a gain")
+T.eq(ex.scaleByPercent(nil, 50), 0, "nil values scale to zero")
+
+-- ------------------------------------------------ rematch party resolution
+
+local markedRec = { rematchIndex = 2, parties = { "p1", "p2" } }
+T.eq(ex.resolvePartyIndex(markedRec, 1), 2, "a marked rematch team wins")
+T.eq(ex.resolvePartyIndex({ rematchIndex = 9, parties = { "p1" } }, 1), 1,
+  "a marked index with no party falls back")
+T.eq(ex.resolvePartyIndex(nil, 3), 3, "no record falls back")
+T.eq(ex.resolvePartyIndex({ parties = {} }, 2), 2, "no marker falls back")
+T.eq(ex.resolveParty(markedRec, 2), "p2", "the marked party resolves")
+T.eq(ex.resolveParty(markedRec, 9), nil, "a bad index yields no party")
+
+-- ------------------------------------------------ rematch XP scaling (hooks)
+
+-- the mod's battle.exp_award wrap marks a rematch while vanilla runs; the
+-- exp.gain wrap it registers scales the finished gained amount.  Drive the
+-- real hook bus the way Runtime.call does: award with an inline vanilla fn
+-- that asks for a gain through the exp.gain hook.
+local function gainThroughAward(battle, participants)
+  local seen
+  run.loader.hooks:call("battle.exp_award", function(ctx)
+    seen = run.loader.hooks:call("exp.gain", function()
+      return 1000
+    end, { defeatedDef = {}, level = 10, isTrainer = true,
+           participants = participants, traded = false, mon = {} })
+  end, { battle = battle })
+  return seen
+end
+run.loader.modOptions["trainer_rematch"] = { rematchXpPct = 10 }
+T.eq(gainThroughAward({ rematch = true }, 1), 100,
+  "10% rematch XP scales the gained amount")
+T.eq(gainThroughAward({}, 1), 1000, "non-rematch battles gain full XP")
+run.loader.modOptions["trainer_rematch"].rematchXpPct = 0
+T.eq(gainThroughAward({ rematch = true }, 1), 0, "0% rematch XP gains nothing")
+run.loader.modOptions["trainer_rematch"].rematchXpPct = 100
+T.eq(gainThroughAward({ rematch = true }, 1), 1000, "100% rematch XP is unchanged")
+run.loader.modOptions["trainer_rematch"] = nil
+
 run.release()
 T.finish("trainer_rematch")
