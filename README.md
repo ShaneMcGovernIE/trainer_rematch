@@ -7,7 +7,7 @@ Talk to any trainer you have already beaten and they challenge you to a rematch,
 1. Beat a trainer, then walk up and talk to them again.
 2. They greet you with a line written for their class (each class speaks in the voice it uses in its regular dialogue).
 3. Answer the prompt:
-   - **YES** - battle them again. Rematch earnings are a **percentage of the usual amounts**, set in MODS > Trainer Rematch: **REMATCH MONEY %** (default 25%) and **REMATCH XP %** (default 100%), each a 0-100% slider in 10% steps. Pay Day stays disabled on rematches.
+   - **YES** - battle them again. Rematch earnings are a **percentage of the usual amounts**, set in MODS > Trainer Rematch: **REMATCH MONEY %** (default 0%) and **REMATCH XP %** (default 100%), each a 0-100% slider in 10% steps. Pay Day stays disabled on rematches.
    - **NO** - they react in character: cocky classes mock you for being scared, wise ones are understanding. Their normal post-battle line still follows, so nothing from the base game is lost.
 
 If the rematch team averages **more than 10 levels above your party**, they warn you first in their own voice and ask again — say YES to battle anyway, or NO to walk away.
