@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.4] - 2026-08-05
+
+### Fixed
+
+- The Rocket Hideout B4F grunt that drops the LIFT KEY keeps his scripted
+  drop. On engines older than v0.1.17 his after-battle talk is not a
+  hand-ported script, so the rematch prompt replaced the key drop and the
+  LIFT KEY never appeared. The manifest now gates those engines out
+  (`game_version` requires v0.1.17+; the dev engine still loads), matching
+  the engine's own fix (bryanthaboi/gen1recomp #90 / #105).
+
 ## [0.4.3] - 2026-08-05
 
 ### Fixed

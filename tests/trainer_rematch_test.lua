@@ -9,6 +9,24 @@ T.eq(#run.errors, 0, "loads clean")
 local ex = run.loader.exports.trainer_rematch
 T.neq(ex, nil, "exports reachable")
 
+-- --------------------------------------- engine gate (Lift Key drop)
+
+-- The Celadon Hideout Rocket grunt (ROCKET_HIDEOUT_B4F_obj_4) drops the
+-- LIFT KEY from a hand-ported talk handler the engine added in v0.1.17
+-- (commit 8278b20).  Before that, his text constant is not scripted, so
+-- the mod's talk wrap would offer a rematch to the defeated grunt instead
+-- of letting the key drop -- a progression-blocking bug (bryanthaboi/
+-- gen1recomp #90 / #105).  The manifest must gate those engines out.
+local Semver = require("src.mods.Semver")
+local gate = run.loader.mods.trainer_rematch.manifest.game_version
+T.eq(type(gate), "string", "manifest declares a game_version gate")
+T.eq(Semver.satisfies("0.1.16", gate), false,
+  "engine before the LIFT KEY talk handler is rejected")
+T.eq(Semver.satisfies("0.1.17", gate), true,
+  "first engine with the LIFT KEY talk handler is accepted")
+T.eq(Semver.satisfies("0.0.0-dev", gate), true,
+  "dev engine is accepted so the mod keeps loading in the dev checkout")
+
 -- ------------------------------------------------ pure line resolution
 
 T.eq(ex.resolveLine("OPP_YOUNGSTER"):find("shorts", 1, true) ~= nil, true,
