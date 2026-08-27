@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.2] - 2026-08-27
+
+### Fixed
+
+- **Gen 1 Active Game Resolution**: Resolved a crash (`attempt to index local 'activeGame' (a nil value)`) when speaking to defeated trainers in Generation 1 (*Red, Blue, Yellow*) by adding robust fallback resolution to the engine's Game singleton.
+
 ## [0.5.1] - 2026-08-27
 
 ### Fixed

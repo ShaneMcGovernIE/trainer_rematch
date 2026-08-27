@@ -549,8 +549,13 @@ local function isTrainerDefeated(self, npc, info)
 
   -- 4. Check save.player.badges or save.badges table or save.engineFlags
   local save = (self.game and self.game.save) or self.save
+  if not save then
+    local ok, Game = pcall(require, "src.core.Game")
+    if ok and Game and Game.save then save = Game.save end
+  end
+
+  local badges = save and ((save.player and save.player.badges) or save.badges)
   if save and leaderInfo then
-    local badges = (save.player and save.player.badges) or save.badges
     if badges and leaderInfo.badge then
       if type(badges) == "table" and (badges[leaderInfo.badge] or badges[leaderInfo.badge:upper()]) then
         return true
@@ -603,9 +608,19 @@ return function(mod)
       min = 0, max = 100, step = 10, default = 100 },
   })
 
+  local function resolveActiveGame(self, game, deps)
+    if self and self.game then return self.game end
+    if game then return game end
+    if deps and deps.game then return deps.game end
+    if mod and mod.world and mod.world.game then return mod.world.game end
+    local ok, Game = pcall(require, "src.core.Game")
+    if ok and Game then return Game end
+    return nil
+  end
+
   local function offerRematch(self, npc, game, deps)
     deps = deps or {}
-    local activeGame = (self and self.game) or game
+    local activeGame = resolveActiveGame(self, game, deps)
     local d = npc.def
     local TextBox = deps.textBox or require("src.render.TextBox")
     local Runtime = deps.runtime or require("src.mods.Runtime")
@@ -714,7 +729,7 @@ return function(mod)
         local d = npc and npc.def
         if not d then return vanillaTalkTo(self, npc) end
 
-        local activeGame = (self and self.game) or game
+        local activeGame = resolveActiveGame(self, game, deps)
         local info = extractTrainerInfo(npc, activeGame, self)
         if info and isTrainerDefeated(self, npc, info) then
           local scripted = mapScripts and mapScripts.talkScript
