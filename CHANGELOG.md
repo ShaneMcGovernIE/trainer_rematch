@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.1] - 2026-08-27
+
+### Fixed
+
+- **First-Time Gym Leader Defeat & Badges**: Resolved an issue where early-game story flags caused undefeated Gym Leaders (such as Falkner) to be mistakenly treated as already defeated on first encounter. Talking to undefeated Gym Leaders now plays their proper story intro and awards their official gym badge and TM upon victory.
+
 ## [0.5.0] - 2026-08-27
 
 ### Added

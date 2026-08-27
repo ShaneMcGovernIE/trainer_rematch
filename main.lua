@@ -348,31 +348,31 @@ end
 
 -- Leader flags and badge events for Gen 2 and Gen 1
 local LEADER_PATTERNS = {
-  FALKNER  = { class = "FALKNER", event = 1213, badge = "ZEPHYR", badgeEvent = 64 },
-  BUGSY    = { class = "BUGSY", event = 1214, badge = "HIVE", badgeEvent = 65 },
-  WHITNEY  = { class = "WHITNEY", event = 1215, badge = "PLAIN", badgeEvent = 66 },
-  MORTY    = { class = "MORTY", event = 1216, badge = "FOG", badgeEvent = 67 },
-  JASMINE  = { class = "JASMINE", event = 1217, badge = "MINERAL", badgeEvent = 69 },
-  CHUCK    = { class = "CHUCK", event = 1218, badge = "STORM", badgeEvent = 68 },
-  PRYCE    = { class = "PRYCE", event = 1219, badge = "GLACIER", badgeEvent = 70 },
-  CLAIR    = { class = "CLAIR", event = 1220, badge = "RISING", badgeEvent = 71 },
-  JANINE   = { class = "JANINE", event = 1225, badge = "SOUL", badgeEvent = 76 },
-  BROCK    = { class = "BROCK", event = 1221, badge = "BOULDER", badgeEvent = 72 },
-  MISTY    = { class = "MISTY", event = 1222, badge = "CASCADE", badgeEvent = 73 },
-  SURGE    = { class = "LT_SURGE", event = 1223, badge = "THUNDER", badgeEvent = 74 },
-  LT_SURGE = { class = "LT_SURGE", event = 1223, badge = "THUNDER", badgeEvent = 74 },
-  LTSURGE  = { class = "LT_SURGE", event = 1223, badge = "THUNDER", badgeEvent = 74 },
-  ERIKA    = { class = "ERIKA", event = 1224, badge = "RAINBOW", badgeEvent = 75 },
-  SABRINA  = { class = "SABRINA", event = 1226, badge = "MARSH", badgeEvent = 77 },
-  BLAINE   = { class = "BLAINE", event = 1227, badge = "VOLCANO", badgeEvent = 78 },
-  BLUE     = { class = "BLUE", event = 1228, badge = "EARTH", badgeEvent = 79 },
+  FALKNER  = { class = "FALKNER", event = 1213, badge = "ZEPHYR", engineFlag = 26 },
+  BUGSY    = { class = "BUGSY", event = 1214, badge = "HIVE", engineFlag = 27 },
+  WHITNEY  = { class = "WHITNEY", event = 1215, badge = "PLAIN", engineFlag = 28 },
+  MORTY    = { class = "MORTY", event = 1216, badge = "FOG", engineFlag = 29 },
+  JASMINE  = { class = "JASMINE", event = 1217, badge = "MINERAL", engineFlag = 30 },
+  CHUCK    = { class = "CHUCK", event = 1218, badge = "STORM", engineFlag = 31 },
+  PRYCE    = { class = "PRYCE", event = 1219, badge = "GLACIER", engineFlag = 32 },
+  CLAIR    = { class = "CLAIR", event = 1220, badge = "RISING", engineFlag = 33 },
+  BROCK    = { class = "BROCK", event = 1221, badge = "BOULDER", engineFlag = 34 },
+  MISTY    = { class = "MISTY", event = 1222, badge = "CASCADE", engineFlag = 35 },
+  SURGE    = { class = "LT_SURGE", event = 1223, badge = "THUNDER", engineFlag = 36 },
+  LT_SURGE = { class = "LT_SURGE", event = 1223, badge = "THUNDER", engineFlag = 36 },
+  LTSURGE  = { class = "LT_SURGE", event = 1223, badge = "THUNDER", engineFlag = 36 },
+  ERIKA    = { class = "ERIKA", event = 1224, badge = "RAINBOW", engineFlag = 37 },
+  JANINE   = { class = "JANINE", event = 1225, badge = "SOUL", engineFlag = 38 },
+  SABRINA  = { class = "SABRINA", event = 1226, badge = "MARSH", engineFlag = 39 },
+  BLAINE   = { class = "BLAINE", event = 1227, badge = "VOLCANO", engineFlag = 40 },
+  BLUE     = { class = "BLUE", event = 1228, badge = "EARTH", engineFlag = 41 },
   RED      = { class = "RED", event = 1229 },
   WILL     = { class = "WILL", event = 1464 },
   KOGA     = { class = "KOGA", event = 1465 },
   BRUNO    = { class = "BRUNO", event = 1466 },
   KAREN    = { class = "KAREN", event = 1467 },
-  LANCE    = { class = "CHAMPION", event = 1468, badgeEvent = 68 },
-  CHAMPION = { class = "CHAMPION", event = 1468, badgeEvent = 68 },
+  LANCE    = { class = "CHAMPION", event = 1468 },
+  CHAMPION = { class = "CHAMPION", event = 1468 },
 }
 
 local function matchLeaderPattern(str)
@@ -542,17 +542,23 @@ local function isTrainerDefeated(self, npc, info)
     if d.trainer and d.trainer.event and checkFlag(d.trainer.event) then
       return true
     end
-    if leaderInfo then
-      if leaderInfo.event and checkFlag(leaderInfo.event) then return true end
-      if leaderInfo.badgeEvent and checkFlag(leaderInfo.badgeEvent) then return true end
+    if leaderInfo and leaderInfo.event and checkFlag(leaderInfo.event) then
+      return true
     end
   end
 
-  -- 4. Check save.player.badges or save.badges table
+  -- 4. Check save.player.badges or save.badges table or save.engineFlags
   local save = (self.game and self.game.save) or self.save
-  local badges = (save and save.player and save.player.badges) or (save and save.badges)
-  if badges and leaderInfo and leaderInfo.badge then
-    if type(badges) == "table" and badges[leaderInfo.badge] then return true end
+  if save and leaderInfo then
+    local badges = (save.player and save.player.badges) or save.badges
+    if badges and leaderInfo.badge then
+      if type(badges) == "table" and (badges[leaderInfo.badge] or badges[leaderInfo.badge:upper()]) then
+        return true
+      end
+    end
+    if save.engineFlags and leaderInfo.engineFlag then
+      if save.engineFlags[leaderInfo.engineFlag] then return true end
+    end
   end
 
   -- 5. Gen 1 numeric bitmask badges

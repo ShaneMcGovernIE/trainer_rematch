@@ -645,14 +645,17 @@ T.neq(gen2StartedScript, nil, "starts battle script for Falkner")
 T.eq(gen2StartedScript[1].class, "FALKNER", "loads Falkner class")
 T.eq(gen2StartedScript[1].member, 1, "loads member 1")
 
--- Undefeated Falkner falls through to vanilla
+-- Undefeated Falkner falls through to vanilla even when early-game events (like event 64) are set
 local falknerOwUndefeated = {
   game = gen2Game,
   player = {},
-  events = { get = function(_, ev) return false end },
+  events = { get = function(_, ev) return ev == 64 end },
+  trainerBeaten = function(self, record) return false end,
   scripts = falknerOwBeaten.scripts,
 }
 pushed = {}
+T.eq(ex.isTrainerDefeated(falknerOwUndefeated, falknerNpc, falknerInfo), false,
+  "Falkner correctly detected as undefeated when only early-game event 64 is set")
 local talkReturned = overworldStub.talkTo(falknerOwUndefeated, falknerNpc)
 T.eq(#pushed, 0, "no rematch prompt for undefeated Falkner")
 T.neq(talkReturned, true, "falls through to vanilla script for undefeated Falkner")
