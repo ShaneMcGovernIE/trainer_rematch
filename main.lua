@@ -366,13 +366,13 @@ local LEADER_PATTERNS = {
   SABRINA  = { class = "SABRINA", event = 1226, badge = "MARSH", engineFlag = 39 },
   BLAINE   = { class = "BLAINE", event = 1227, badge = "VOLCANO", engineFlag = 40 },
   BLUE     = { class = "BLUE", event = 1228, badge = "EARTH", engineFlag = 41 },
-  RED      = { class = "RED", event = 1229 },
-  WILL     = { class = "WILL", event = 1464 },
-  KOGA     = { class = "KOGA", event = 1465 },
-  BRUNO    = { class = "BRUNO", event = 1466 },
-  KAREN    = { class = "KAREN", event = 1467 },
-  LANCE    = { class = "CHAMPION", event = 1468 },
-  CHAMPION = { class = "CHAMPION", event = 1468 },
+  RED      = { class = "RED", event = 1890 },
+  WILL     = { class = "WILL" },
+  KOGA     = { class = "KOGA" },
+  BRUNO    = { class = "BRUNO" },
+  KAREN    = { class = "KAREN" },
+  LANCE    = { class = "CHAMPION" },
+  CHAMPION = { class = "CHAMPION" },
 }
 
 local function matchLeaderPattern(str)
