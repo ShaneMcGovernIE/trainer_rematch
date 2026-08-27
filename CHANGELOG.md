@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.0] - 2026-08-27
+
+### Added
+
+- **Full Generation 2 Support**: Trainer Rematches now work seamlessly in *Pokémon Gold, Silver, and Crystal* alongside *Pokémon Red, Blue, and Yellow*.
+- **Gym Leader & Boss Rematches**: Talk to beaten Gym Leaders (Falkner, Bugsy, Whitney, Morty, Chuck, Jasmine, Pryce, Clair, and Kanto leaders), Elite Four members, and Champions anytime to challenge them to a rematch.
+- **Custom Character Dialogue**: Unique opening challenges, decline reactions, and level-gap warnings tailored to every trainer class and Gym Leader across both generations.
+- **Configurable Rewards**: Custom EXP (0–100%) and Prize Money (0–100%) multipliers configurable from the in-game MODS menu.
+
+### Fixed
+
+- **Clean Dialogue Pacing**: Re-paginated all dialogue boxes to adhere to standard screen widths, preventing text from auto-advancing unexpectedly.
+- **Gym Leader Interaction**: Resolved an issue where talking to defeated Gym Leaders in Gen 2 would repeat standard advice instead of offering a rematch.
+
 ## [0.4.4] - 2026-08-05
 
 ### Fixed

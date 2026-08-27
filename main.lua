@@ -7,136 +7,280 @@
 
 -- One line per trainer class, written in the class's voice.  The line
 -- leads straight into the YES/NO prompt, so every one reads as a
--- challenge.  Rows are the text box's lines (max 18 chars each).
+-- challenge.  Rows are the text box's lines (max 18 chars each, max 2 lines per box).
 local REMATCH_LINES = {
-  OPP_YOUNGSTER    = "I like shorts!\nBut I'm not\nlosing twice!",
-  OPP_BUG_CATCHER  = "My BUG POKéMON\nwant to battle\nyou again!",
-  OPP_LASS         = "I've been training\nsince we last\nfought. Rematch?",
-  OPP_SAILOR       = "You're back,\nlandlubber! One\nmore battle?",
-  OPP_JR_TRAINER_M = "I'll try harder\nthis time. Let's\nbattle again!",
-  OPP_JR_TRAINER_F = "I've practiced\na lot since\nlast time!",
-  OPP_POKEMANIAC   = "I've caught even\nmore POKéMON\nsince you beat me!",
-  OPP_SUPER_NERD   = "I've studied\nyour strategy.\nLet's try again!",
-  OPP_HIKER        = "I've climbed many\nmountains since\nour last battle!",
-  OPP_BIKER        = "You're back for\nmore? Let's go\nfor a ride!",
-  OPP_BURGLAR      = "You beat me\nonce. I want to\nsettle this!",
-  OPP_ENGINEER     = "I've built some\nnew machines.\nTest them!",
-  OPP_UNUSED_JUGGLER = "I've been\npracticing my\njuggling. Watch!",
-  OPP_FISHER       = "The fish here\naren't the only\nthing I'll catch!",
-  OPP_SWIMMER      = "The water's fine.\nLet's battle\nagain!",
-  OPP_CUE_BALL     = "I'm not done\nwith you yet.\nRematch!",
-  OPP_GAMBLER      = "I'll bet my\nPOKéMON can beat\nyours this time!",
-  OPP_BEAUTY       = "I won't lose\nthis time. Care\nfor a rematch?",
-  OPP_PSYCHIC_TR   = "I knew you'd\ncome back. Let's\nbattle again!",
-  OPP_ROCKER       = "The encore is\nover. Time for\nround two!",
-  OPP_JUGGLER      = "I've been\npracticing my\njuggling. Watch!",
-  OPP_TAMER        = "My POKéMON are\nhungry for a\nrematch!",
-  OPP_BIRD_KEEPER  = "My flying\nPOKéMON want to\nbattle again!",
-  OPP_BLACKBELT    = "I've trained hard\nsince our last\nbattle. Rematch?",
-  OPP_RIVAL1       = "You again? Fine,\nbut this time\nI'm not losing!",
-  OPP_RIVAL2       = "You again? Fine,\nbut this time\nI'm not losing!",
-  OPP_RIVAL3       = "You again? Fine,\nbut this time\nI'm not losing!",
-  OPP_PROF_OAK     = "Care to battle\nme again, my\nyoung friend?",
-  OPP_CHIEF        = "I won't lose\ntwice. Rematch!",
-  OPP_SCIENTIST    = "My research\nshows I can\nbeat you now!",
-  OPP_GIOVANNI     = "You've got nerve\ncoming back.\nWe'll see!",
-  OPP_ROCKET       = "Team Rocket\nalways comes\nback. Rematch!",
-  OPP_COOLTRAINER_M = "I've gotten\nstronger since\nwe last fought!",
-  OPP_COOLTRAINER_F = "You're strong,\nbut I've trained\nsince then. Again?",
-  OPP_BRUNO        = "Hoo hah! My\nmuscles have\ngrown! Rematch!",
-  OPP_BROCK        = "You've returned.\nMy rock-hard\nPOKéMON await you!",
-  OPP_MISTY        = "You're back!\nMy WATER POKéMON\nare ready for you!",
-  OPP_LT_SURGE     = "Shock me again\nif you can,\nkid!",
-  OPP_ERIKA        = "How lovely to\nsee you again.\nShall we battle?",
-  OPP_KOGA         = "You have grown.\nProve it once\nmore. Rematch.",
-  OPP_BLAINE       = "Ha! Fire burns\nbrighter the\nsecond time!",
-  OPP_SABRINA      = "I foresaw your\nreturn. I have\nbeen waiting.",
-  OPP_GENTLEMAN    = "Care for a\ncivilized\nrematch?",
-  OPP_LORELEI      = "The cold winds\ncall for another\nbattle. Come.",
-  OPP_CHANNELER    = "The spirits\nwish to see\nanother battle.",
-  OPP_AGATHA       = "Heh heh heh.\nBack for more,\nare you?",
-  OPP_LANCE        = "My dragons have\nslept long\nenough. Prove\nyourself again!",
+  -- Gen 1 / Shared classes
+  OPP_YOUNGSTER    = "I like shorts!\nRematch with me?",
+  OPP_BUG_CATCHER  = "My BUG POKéMON\nwant a rematch!",
+  OPP_LASS         = "I've trained since\nwe fought. Again?",
+  OPP_SAILOR       = "Ahoy, landlubber!\nOne more battle?",
+  OPP_JR_TRAINER_M = "I'll try harder\nnow. Let's battle!",
+  OPP_JR_TRAINER_F = "I've practiced a\nlot! Rematch?",
+  OPP_POKEMANIAC   = "Caught even more\nPOKéMON! Rematch?",
+  OPP_SUPER_NERD   = "I studied your\nmoves. Try again?",
+  OPP_HIKER        = "Climbed mountains\nsince then! Fight?",
+  OPP_BIKER        = "Back for more?\nLet's ride again!",
+  OPP_BURGLAR      = "You beat me once.\nTime to settle it!",
+  OPP_ENGINEER     = "Built new machines\nfor this! Battle?",
+  OPP_UNUSED_JUGGLER = "New juggling moves\nto show! Rematch?",
+  OPP_FISHER       = "Caught more than\nfish! Care to try?",
+  OPP_SWIMMER      = "The water is fine!\nLet's go again!",
+  OPP_CUE_BALL     = "Not done with you\nyet. Rematch!",
+  OPP_GAMBLER      = "Bet my POKéMON can\nwin this time!",
+  OPP_BEAUTY       = "I won't lose this\ntime. Rematch?",
+  OPP_PSYCHIC_TR   = "I saw your return!\nBattle again?",
+  OPP_ROCKER       = "Encore is over!\nReady for round 2?",
+  OPP_JUGGLER      = "New juggling moves\nto show! Rematch?",
+  OPP_TAMER        = "My beasts hunger\nfor a rematch!",
+  OPP_BIRD_KEEPER  = "My flock wants to\nbattle you again!",
+  OPP_BLACKBELT    = "Trained hard since\nlast time! Fight?",
+  OPP_RIVAL1       = "You again? I won't\nlose this time!",
+  OPP_RIVAL2       = "You again? I won't\nlose this time!",
+  OPP_RIVAL3       = "You again? I won't\nlose this time!",
+  OPP_PROF_OAK     = "Care to battle me\nagain, my friend?",
+  OPP_CHIEF        = "I won't lose\ntwice! Rematch!",
+  OPP_SCIENTIST    = "Research says I'll\nwin now! Rematch?",
+  OPP_GIOVANNI     = "Nerve to return?\nWe shall see!",
+  OPP_ROCKET       = "Team Rocket always\nreturns! Battle?",
+  OPP_COOLTRAINER_M = "I've grown much\nstronger! Rematch?",
+  OPP_COOLTRAINER_F = "You're strong, but\nI've trained! Go?",
+  OPP_BRUNO        = "Hoo hah! Muscles\ngrown! Rematch!",
+  OPP_BROCK        = "My rock-hard team\nawaits you again!",
+  OPP_MISTY        = "My WATER POKéMON\nare ready! Battle?",
+  OPP_LT_SURGE     = "Shock me again if\nyou can, kid!",
+  OPP_ERIKA        = "Lovely to see you.\nShall we battle?",
+  OPP_KOGA         = "Prove your growth\nonce more! Fight!",
+  OPP_BLAINE       = "Fire burns hotter\nthe second time!",
+  OPP_SABRINA      = "I foresaw this.\nI have been ready.",
+  OPP_GENTLEMAN    = "Care for another\ncivilized bout?",
+  OPP_LORELEI      = "The cold winds\ncall us! Battle?",
+  OPP_CHANNELER    = "Spirits wish for\nanother battle!",
+  OPP_AGATHA       = "Heh heh! Back for\nmore, are you?",
+  OPP_LANCE        = "My dragons hunger\nfor battle! Ready?",
+
+  -- Gen 2 Leaders, Elite Four & Champions
+  OPP_FALKNER      = "I've been training\nsince our battle.\fShall we battle in\nthe sky once more?",
+  OPP_BUGSY        = "BUG research has\ndeepened! Rematch?",
+  OPP_WHITNEY      = "I won't cry now!\nLet's fight again!",
+  OPP_MORTY        = "Ghosts trained in\nsecret! Rematch?",
+  OPP_CHUCK        = "HRAAGH! Waterfall\ntraining! Rematch?",
+  OPP_JASMINE      = "My steel defense\nhas grown! Battle?",
+  OPP_PRYCE        = "Winter tempered my\nresolve! Rematch?",
+  OPP_CLAIR        = "I won't lose now!\nFace my dragons!",
+  OPP_WILL         = "I foresaw our next\nclash! Prepared?",
+  OPP_KAREN        = "Battle with your\nfavorites again!",
+  OPP_JANINE       = "Ninja skills won't\nfail me! Prepare!",
+  OPP_RED          = "... ... ...\n... ... Rematch?",
+  OPP_BLUE         = "Smell ya later?\nNo way! Let's go!",
+  OPP_CAL          = "Test our skills\nonce more! Ready?",
+
+  -- Gen 2 Johto/Kanto Trainer Classes
+  OPP_SCHOOLBOY    = "Studied all battle\ntheory! Test me!",
+  OPP_SKIER        = "Snow is fresh and\nso is my team! Go!",
+  OPP_TEACHER      = "Time for a pop\nquiz in battling!",
+  OPP_FIREBREATHER = "My fire burns even\nhotter! Feel heat!",
+  OPP_SAGE         = "Harmony of spirits\ntested once more.",
+  OPP_MEDIUM       = "Spirits gather for\nour battle. Begin?",
+  OPP_BOARDER      = "New moves on the\nsnow! Rematch?",
+  OPP_POKEFANM     = "Darling POKéMON\nready to show off!",
+  OPP_POKEFANF     = "My sweet POKéMON\ncare to battle?",
+  OPP_KIMONO_GIRL  = "Dance with our\nPOKéMON once more?",
+  OPP_TWINS        = "Twice as tough as\nbefore! Rematch?",
+  OPP_OFFICER      = "Halt! Care for a\nfriendly spar?",
+  OPP_EXECUTIVEM   = "Team Rocket will\nnot lose! Rematch!",
+  OPP_EXECUTIVEF   = "Pay for meddling\nwith us! Rematch!",
+  OPP_MYSTICALMAN  = "Passion for legend\nnever wanes! Go!",
 }
 
-local DEFAULT_LINE = "You're looking\nfor a rematch?"
+local DEFAULT_LINE = "Looking for a\nrematch with me?"
 
 -- One line per trainer class for when the player says NO.  Cocky and
 -- rough classes mock the player; wise and polite ones are understanding.
 local REMATCH_DECLINES = {
-  OPP_YOUNGSTER    = "Ha! I knew\nit! Too scared\nto face me!",
-  OPP_BUG_CATCHER  = "Chirp chirp!\nScared of a few\nlittle bugs?",
-  OPP_LASS         = "Oh, I see.\nToo frightened\nof me, I bet!",
-  OPP_SAILOR       = "Avast! Scared\nof the sea,\nare ya?",
-  OPP_JR_TRAINER_M = "Coward! I bet\nyou're scared of\na real battle!",
-  OPP_JR_TRAINER_F = "You're scared,\naren't you? I\nknew it!",
-  OPP_POKEMANIAC   = "Ha! I guess my\ncollection scared\nyou off!",
-  OPP_SUPER_NERD   = "Interesting.\nFear is just\npoor calculations.",
-  OPP_HIKER        = "Hmph! Scared of\na little climb,\nare ya?",
-  OPP_BIKER        = "Chicken! My\nwheels are too\nfast for you!",
-  OPP_BURGLAR      = "Smart move.\nYou'd lose your\nPOKéMON to me.",
-  OPP_ENGINEER     = "Fear of a\nmachine breakdown?\nHow fitting!",
-  OPP_UNUSED_JUGGLER = "Afraid I'll\njuggle you dizzy?\nHeh.",
+  -- Gen 1 / Shared classes
+  OPP_YOUNGSTER    = "Ha! I knew it!\nToo scared for me!",
+  OPP_BUG_CATCHER  = "Scared of a few\nlittle bugs? Haha!",
+  OPP_LASS         = "Oh, I see. Too\nfrightened of me!",
+  OPP_SAILOR       = "Avast! Scared of\nthe sea, are ya?",
+  OPP_JR_TRAINER_M = "Coward! Scared of\na real battle!",
+  OPP_JR_TRAINER_F = "You're scared, I\nknew it! Teehee!",
+  OPP_POKEMANIAC   = "Ha! My collection\nscared you off!",
+  OPP_SUPER_NERD   = "Fear is just poor\ncalculations.",
+  OPP_HIKER        = "Hmph! Scared of a\nlittle climb, eh?",
+  OPP_BIKER        = "Chicken! My wheels\nare too fast!",
+  OPP_BURGLAR      = "Smart move. You'd\nlose to me anyway.",
+  OPP_ENGINEER     = "Fear of machine\nfailure? Fitting!",
+  OPP_UNUSED_JUGGLER = "Afraid I'll juggle\nyou dizzy? Heh.",
   OPP_FISHER       = "Got cold feet,\ndid ya? Ha!",
-  OPP_SWIMMER      = "Scared to dip\nyour toes in,\nhuh?",
-  OPP_CUE_BALL     = "Hah! You're\nscared of my\ntough moves!",
-  OPP_GAMBLER      = "Chicken out? I\nwould've bet on\nit. Ha!",
-  OPP_BEAUTY       = "Oh my. Afraid\nyour POKéMON\ncan't shine?",
-  OPP_PSYCHIC_TR   = "I can see your\nfear. It's\nquite loud.",
-  OPP_ROCKER       = "Too loud for\nyou? Ha! What\na pansy!",
-  OPP_JUGGLER      = "Afraid I'll\njuggle you dizzy?\nHeh.",
-  OPP_TAMER        = "Wise. My beasts\nwould've torn\nyou apart.",
-  OPP_BIRD_KEEPER  = "Scared of a\nlittle flight?\nHa!",
-  OPP_BLACKBELT    = "A wise choice.\nMy fists are\ntoo strong for\nyou.",
-  OPP_RIVAL1       = "Ha! What a\nwimp. I've got\nbetter things\nto do.",
-  OPP_RIVAL2       = "Ha! What a\nwimp. I've got\nbetter things\nto do.",
-  OPP_RIVAL3       = "Ha! What a\nwimp. I've got\nbetter things\nto do.",
-  OPP_PROF_OAK     = "Very well.\nWhen you're\nready, come\nback.",
-  OPP_CHIEF        = "Chicken! I\nthought you had\nnerve!",
-  OPP_SCIENTIST    = "Fear is a\nvariable I\naccounted for.",
-  OPP_GIOVANNI     = "Coward. I\nexpected better\nof you.",
-  OPP_ROCKET       = "Scared of Team\nRocket's power,\nhuh?",
+  OPP_SWIMMER      = "Scared to dip your\ntoes in, huh?",
+  OPP_CUE_BALL     = "Hah! Scared of my\ntough moves!",
+  OPP_GAMBLER      = "Chicken out? I'd\nhave bet on it!",
+  OPP_BEAUTY       = "Afraid my POKéMON\nwill outshine you?",
+  OPP_PSYCHIC_TR   = "I can see fear.\nIt's quite loud.",
+  OPP_ROCKER       = "Too loud for you?\nHa! What a wimp!",
+  OPP_JUGGLER      = "Afraid I'll juggle\nyou dizzy? Heh.",
+  OPP_TAMER        = "Wise. My beasts\nwould crush you.",
+  OPP_BIRD_KEEPER  = "Scared of a little\nflight? Ha!",
+  OPP_BLACKBELT    = "Wise choice. My\nfists are strong.",
+  OPP_RIVAL1       = "Ha! What a wimp.\nSee ya later!",
+  OPP_RIVAL2       = "Ha! What a wimp.\nSee ya later!",
+  OPP_RIVAL3       = "Ha! What a wimp.\nSee ya later!",
+  OPP_PROF_OAK     = "Very well. Return\nwhen you're ready.",
+  OPP_CHIEF        = "Chicken! I thought\nyou had nerve!",
+  OPP_SCIENTIST    = "Fear is a variable\nI accounted for.",
+  OPP_GIOVANNI     = "Coward. I expected\nbetter of you.",
+  OPP_ROCKET       = "Scared of Team\nRocket's power?",
   OPP_COOLTRAINER_M = "Too cool for a\nrematch? Ha!",
-  OPP_COOLTRAINER_F = "Chicken! And\nhere I thought\nyou were strong.",
-  OPP_BRUNO        = "Hoo hah! Fear\nis a weakness!\nTrain harder!",
-  OPP_BROCK        = "Hm. You aren't\nready. Come\nback when you\nare.",
-  OPP_MISTY        = "Heh, scared of\nsome WATER\nPOKéMON?",
-  OPP_LT_SURGE     = "Ha! Scared of\na little shock?\nSome soldier\nyou are!",
-  OPP_ERIKA        = "How shy. When\nyou're ready,\nI'll be here.",
-  OPP_KOGA         = "Fear is poison.\nTrain your\nmind, then\nreturn.",
-  OPP_BLAINE       = "Ha! The heat\ntoo much for\nyou?",
-  OPP_SABRINA      = "I foresaw this\ntoo. Your fear\nis clear.",
-  OPP_GENTLEMAN    = "Very well. A\ntrue gentleman\nnever presses.",
-  OPP_LORELEI      = "Cold feet in\nthe cold winds?\nHow fitting.",
-  OPP_CHANNELER    = "The spirits\ncan wait. Fear\nis natural.",
-  OPP_AGATHA       = "Heh heh. Scared\nof an old\nwoman, are you?",
-  OPP_LANCE        = "I respect a\ncareful trainer.\nTrain, then\nreturn.",
+  OPP_COOLTRAINER_F = "Chicken! I thought\nyou were strong.",
+  OPP_BRUNO        = "Hoo hah! Fear is\nweakness! Train!",
+  OPP_BROCK        = "Not ready yet?\nCome back later.",
+  OPP_MISTY        = "Scared of getting\nsoaked? Heh!",
+  OPP_LT_SURGE     = "Ha! Scared of a\nlittle shock, kid?",
+  OPP_ERIKA        = "How shy. I will be\nhere when ready.",
+  OPP_KOGA         = "Fear is poison.\nTrain your mind.",
+  OPP_BLAINE       = "Ha! The heat is\ntoo much for you!",
+  OPP_SABRINA      = "I foresaw this.\nFear is obvious.",
+  OPP_GENTLEMAN    = "A true gentleman\nnever presses.",
+  OPP_LORELEI      = "Cold feet in cold\nwinds? Fitting.",
+  OPP_CHANNELER    = "Spirits can wait.\nFear is natural.",
+  OPP_AGATHA       = "Heh heh! Scared of\nan old woman?",
+  OPP_LANCE        = "I respect care.\nTrain and return.",
+
+  -- Gen 2 Leaders, Elite Four & Champions
+  OPP_FALKNER      = "I understand. The\nskies can wait.",
+  OPP_BUGSY        = "Aw, don't bug out\non me now!",
+  OPP_WHITNEY      = "Waaah! Why're you\nbeing so mean?",
+  OPP_MORTY        = "Unseen paths are\nnot for everyone.",
+  OPP_CHUCK        = "Wahaha! Need to\nbulk up first?",
+  OPP_JASMINE      = "I understand...\nTake care, then.",
+  OPP_PRYCE        = "A frozen heart\ncannot battle.",
+  OPP_CLAIR        = "Hmph! Don't waste\nmy time, then!",
+  OPP_WILL         = "You cannot escape\nyour destiny.",
+  OPP_KAREN        = "Hmph. How very\ndisappointing.",
+  OPP_JANINE       = "Hahaha! Fooled by\nmy illusions?",
+  OPP_RED          = "... ...\n... ...",
+  OPP_BLUE         = "Haha! Still scared\nof the CHAMPION?",
+  OPP_CAL          = "Come back when you\nare ready.",
+
+  -- Gen 2 Johto/Kanto Trainer Classes
+  OPP_SCHOOLBOY    = "Aww, back to my\nstudies then...",
+  OPP_SKIER        = "Brrr! Got cold\nfeet already?",
+  OPP_TEACHER      = "You get an F for\neffort today!",
+  OPP_FIREBREATHER = "Too hot to handle,\nhuh?",
+  OPP_SAGE         = "Patience and peace\nbe with you.",
+  OPP_MEDIUM       = "Spirits depart in\nsilence...",
+  OPP_BOARDER      = "Wiped out before\nwe started?",
+  OPP_POKEFANM     = "Oh, you're missing\nout on cuteness!",
+  OPP_POKEFANF     = "My POKéMON are too\nsweet for you!",
+  OPP_KIMONO_GIRL  = "A gentle bow to\nyour prudence.",
+  OPP_TWINS        = "Aww! You're no fun\nat all!",
+  OPP_OFFICER      = "Move along then,\ncitizen!",
+  OPP_EXECUTIVEM   = "Coward! You know\nRocket's power!",
+  OPP_EXECUTIVEF   = "Smart of you to\nrun away.",
+  OPP_MYSTICALMAN  = "The wind guides\nyou elsewhere...",
 }
 
-local DEFAULT_DECLINE = "Ha! Scared of\na rematch, are\nyou?"
+local DEFAULT_DECLINE = "Ha! Scared of a\nrematch, are you?"
 
 -- One line per trainer class for the "your team is far stronger" warning,
 -- spoken when the rematch team averages more than 10 levels above the
 -- player's party.  Same voice as the challenge lines: the class owns the
--- warning.  Rows are the text box's lines (max 18 chars each).
+-- warning.  Rows are the text box's lines (max 18 chars each, max 2 lines per box).
 local REMATCH_WARNINGS = {
-  OPP_BROCK      = "Hm. My team is\nfar stronger than\nbefore. Are you\nsure?",
-  OPP_MISTY      = "My POKéMON have\ngrown far beyond\nyours. Really?",
-  OPP_LT_SURGE   = "Warning: my team\nis on another\nlevel. Still in?",
-  OPP_ERIKA      = "My flowers have\nbloomed past your\nteam's strength.\nStill sure?",
-  OPP_KOGA       = "My poison has\ngrown deadlier\nthan your team\ncan handle. Sure?",
-  OPP_BLAINE     = "The heat burns\nfar beyond your\nteam. Ready?",
-  OPP_SABRINA    = "I foresee your\nteam is far\nbehind mine. Are\nyou certain?",
-  OPP_LORELEI    = "My cold winds\nare far stronger\nthan your team.\nContinue?",
-  OPP_BRUNO      = "Hoo hah! My power\nis far beyond\nyours! Still\nsure?",
-  OPP_AGATHA     = "Heh heh. My\nghosts are far\nabove your team.\nSure about this?",
-  OPP_LANCE      = "My dragons tower\nfar above your\nteam. Do you\nreally wish to?",
-  OPP_RIVAL3     = "My team is far\nstronger than\nyours now. Sure?",
+  OPP_BROCK      = "My team is far\nstronger. Sure?",
+  OPP_MISTY      = "My team is far\nbeyond yours! Go?",
+  OPP_LT_SURGE   = "Warning: my team\nis high level! Go?",
+  OPP_ERIKA      = "My flowers bloomed\npast you. Sure?",
+  OPP_KOGA       = "My deadly poison\nis beyond you! Go?",
+  OPP_BLAINE     = "The heat burns far\nbeyond you! Ready?",
+  OPP_SABRINA    = "I see your team is\noutmatched. Sure?",
+  OPP_LORELEI    = "My cold winds are\nfar stronger! Go?",
+  OPP_BRUNO      = "Hoo hah! My power\nis far beyond you!",
+  OPP_AGATHA     = "Heh! My ghosts are\nfar above you! Go?",
+  OPP_LANCE      = "My dragons tower\nfar above you! Go?",
+  OPP_RIVAL3     = "My team is far\nstronger! Sure?",
+
+  -- Gen 2 Leaders & Bosses
+  OPP_FALKNER    = "My birds soar far\nabove you. Sure?",
+  OPP_BUGSY      = "My bugs swarm far\nbeyond you. Ready?",
+  OPP_WHITNEY    = "Cute POKéMON are\nsuper tough! Sure?",
+  OPP_MORTY      = "My ghost POKéMON\nlurk beyond! Sure?",
+  OPP_CHUCK      = "HRAAGH! Crush you\nwith power! Sure?",
+  OPP_JASMINE    = "My steel defense\nis far beyond you!",
+  OPP_PRYCE      = "Biting cold will\nfreeze you. Ready?",
+  OPP_CLAIR      = "Dragon wrath is\nbeyond you! Ready?",
+  OPP_WILL       = "I saw your team is\noutmatched. Sure?",
+  OPP_KAREN      = "Dark team is far\nstronger now. Go?",
+  OPP_JANINE     = "Toxic tricks are\nbeyond you! Ready?",
+  OPP_RED        = "... ... ...!\n(He is powerful!)",
+  OPP_BLUE       = "My genius team is\nway out of league!",
+  OPP_CAL        = "Training team is\nfar above! Sure?",
+  OPP_EXECUTIVEM = "Executive power\nis far beyond you!",
+  OPP_EXECUTIVEF = "I'll crush you\nwithout mercy! Go?",
 }
 
-local DEFAULT_WARN = "My team is far\nstronger than\nyours. Are you\nsure?"
+local DEFAULT_WARN = "My team is far\nstronger! Sure?"
+
+-- Normalize trainer class names across Gen 1 (OPP_ prefix), Gen 2 (bare names),
+-- and variant naming spellings.
+local ALIAS_MAP = {
+  OPP_COOLTRAINERM = "OPP_COOLTRAINER_M",
+  COOLTRAINERM     = "OPP_COOLTRAINER_M",
+  COOLTRAINER_M    = "OPP_COOLTRAINER_M",
+  OPP_COOLTRAINERF = "OPP_COOLTRAINER_F",
+  COOLTRAINERF     = "OPP_COOLTRAINER_F",
+  COOLTRAINER_F    = "OPP_COOLTRAINER_F",
+  OPP_BLACKBELT_T  = "OPP_BLACKBELT",
+  BLACKBELT_T      = "OPP_BLACKBELT",
+  BLACKBELT        = "OPP_BLACKBELT",
+  OPP_PSYCHIC_T    = "OPP_PSYCHIC_TR",
+  PSYCHIC_T        = "OPP_PSYCHIC_TR",
+  PSYCHIC_TR       = "OPP_PSYCHIC_TR",
+  OPP_SWIMMERM     = "OPP_SWIMMER",
+  SWIMMERM         = "OPP_SWIMMER",
+  OPP_SWIMMERF     = "OPP_SWIMMER",
+  SWIMMERF         = "OPP_SWIMMER",
+  SWIMMER          = "OPP_SWIMMER",
+  OPP_CAMPER       = "OPP_JR_TRAINER_M",
+  CAMPER           = "OPP_JR_TRAINER_M",
+  JR_TRAINER_M     = "OPP_JR_TRAINER_M",
+  OPP_PICNICKER    = "OPP_JR_TRAINER_F",
+  PICNICKER        = "OPP_JR_TRAINER_F",
+  JR_TRAINER_F     = "OPP_JR_TRAINER_F",
+  OPP_GUITARIST    = "OPP_ROCKER",
+  GUITARIST        = "OPP_ROCKER",
+  ROCKER           = "OPP_ROCKER",
+  OPP_GRUNTM       = "OPP_ROCKET",
+  GRUNTM           = "OPP_ROCKET",
+  OPP_GRUNTF       = "OPP_ROCKET",
+  GRUNTF           = "OPP_ROCKET",
+  ROCKET           = "OPP_ROCKET",
+  OPP_CHAMPION     = "OPP_LANCE",
+  CHAMPION         = "OPP_LANCE",
+  LANCE            = "OPP_LANCE",
+  OPP_POKEMON_PROF = "OPP_PROF_OAK",
+  POKEMON_PROF     = "OPP_PROF_OAK",
+  PROF_OAK         = "OPP_PROF_OAK",
+}
+
+local function normalizeClassId(classId)
+  if not classId then return nil end
+  if type(classId) ~= "string" then classId = tostring(classId) end
+  if ALIAS_MAP[classId] then return ALIAS_MAP[classId] end
+  if REMATCH_LINES[classId] then return classId end
+  local opp = "OPP_" .. classId
+  if REMATCH_LINES[opp] then return opp end
+  if classId:sub(1, 4) == "OPP_" then
+    local stripped = classId:sub(5)
+    if REMATCH_LINES[stripped] then return stripped end
+    if ALIAS_MAP[stripped] then return ALIAS_MAP[stripped] end
+  end
+  return classId
+end
 
 local function resolveWarning(classId)
-  return REMATCH_WARNINGS[classId] or DEFAULT_WARN
+  local key = normalizeClassId(classId)
+  return (key and REMATCH_WARNINGS[key]) or REMATCH_WARNINGS[classId] or DEFAULT_WARN
 end
 
 -- How many levels the trainer's team averages above the player's party;
@@ -170,20 +314,30 @@ end
 -- fallback is the npc's usual party index
 local function resolvePartyIndex(record, fallback)
   local marked = record and record.rematchIndex
-  if marked and record.parties and record.parties[marked] then return marked end
+  if marked then
+    if record.parties and record.parties[marked] then return marked end
+    if record.trainers and record.trainers[marked] then return marked end
+  end
   return fallback
 end
 
 local function resolveParty(record, index)
-  return record and record.parties and record.parties[index]
+  if not record or not index then return nil end
+  if record.parties and record.parties[index] then return record.parties[index] end
+  if record.trainers and record.trainers[index] then
+    return record.trainers[index].party or record.trainers[index].roster
+  end
+  return nil
 end
 
 local function resolveLine(classId)
-  return REMATCH_LINES[classId] or DEFAULT_LINE
+  local key = normalizeClassId(classId)
+  return (key and REMATCH_LINES[key]) or REMATCH_LINES[classId] or DEFAULT_LINE
 end
 
 local function resolveDecline(classId)
-  return REMATCH_DECLINES[classId] or DEFAULT_DECLINE
+  local key = normalizeClassId(classId)
+  return (key and REMATCH_DECLINES[key]) or REMATCH_DECLINES[classId] or DEFAULT_DECLINE
 end
 
 -- the prize line filtered out of rematch victory queues
@@ -192,15 +346,245 @@ local function isPrizeLine(text)
     and text:find("for winning", 1, true) ~= nil
 end
 
+-- Leader flags and badge events for Gen 2 and Gen 1
+local LEADER_PATTERNS = {
+  FALKNER  = { class = "FALKNER", event = 1213, badge = "ZEPHYR", badgeEvent = 64 },
+  BUGSY    = { class = "BUGSY", event = 1214, badge = "HIVE", badgeEvent = 65 },
+  WHITNEY  = { class = "WHITNEY", event = 1215, badge = "PLAIN", badgeEvent = 66 },
+  MORTY    = { class = "MORTY", event = 1216, badge = "FOG", badgeEvent = 67 },
+  JASMINE  = { class = "JASMINE", event = 1217, badge = "MINERAL", badgeEvent = 69 },
+  CHUCK    = { class = "CHUCK", event = 1218, badge = "STORM", badgeEvent = 68 },
+  PRYCE    = { class = "PRYCE", event = 1219, badge = "GLACIER", badgeEvent = 70 },
+  CLAIR    = { class = "CLAIR", event = 1220, badge = "RISING", badgeEvent = 71 },
+  JANINE   = { class = "JANINE", event = 1225, badge = "SOUL", badgeEvent = 76 },
+  BROCK    = { class = "BROCK", event = 1221, badge = "BOULDER", badgeEvent = 72 },
+  MISTY    = { class = "MISTY", event = 1222, badge = "CASCADE", badgeEvent = 73 },
+  SURGE    = { class = "LT_SURGE", event = 1223, badge = "THUNDER", badgeEvent = 74 },
+  LT_SURGE = { class = "LT_SURGE", event = 1223, badge = "THUNDER", badgeEvent = 74 },
+  LTSURGE  = { class = "LT_SURGE", event = 1223, badge = "THUNDER", badgeEvent = 74 },
+  ERIKA    = { class = "ERIKA", event = 1224, badge = "RAINBOW", badgeEvent = 75 },
+  SABRINA  = { class = "SABRINA", event = 1226, badge = "MARSH", badgeEvent = 77 },
+  BLAINE   = { class = "BLAINE", event = 1227, badge = "VOLCANO", badgeEvent = 78 },
+  BLUE     = { class = "BLUE", event = 1228, badge = "EARTH", badgeEvent = 79 },
+  RED      = { class = "RED", event = 1229 },
+  WILL     = { class = "WILL", event = 1464 },
+  KOGA     = { class = "KOGA", event = 1465 },
+  BRUNO    = { class = "BRUNO", event = 1466 },
+  KAREN    = { class = "KAREN", event = 1467 },
+  LANCE    = { class = "CHAMPION", event = 1468, badgeEvent = 68 },
+  CHAMPION = { class = "CHAMPION", event = 1468, badgeEvent = 68 },
+}
+
+local function matchLeaderPattern(str)
+  if not str or type(str) ~= "string" then return nil end
+  local upper = str:upper()
+  for name, leader in pairs(LEADER_PATTERNS) do
+    if upper:find(name, 1, true) then
+      return leader
+    end
+  end
+  return nil
+end
+
+local function scanScriptForTrainer(scriptList, allScripts, visited)
+  if not scriptList or type(scriptList) ~= "table" then return nil end
+  visited = visited or {}
+  local foundClass, foundMember, foundEvent
+  for _, cmd in ipairs(scriptList) do
+    if type(cmd) == "table" then
+      local op = cmd.op
+      if op == "loadtrainer" then
+        foundClass = cmd.class or (cmd.args and cmd.args[1])
+        foundMember = cmd.member or (cmd.args and cmd.args[2])
+      elseif op == "checkevent" or op == "checkflag" then
+        if not foundEvent then
+          foundEvent = cmd.event or cmd.flag or (cmd.args and cmd.args[1])
+        end
+      elseif (op == "iftrue" or op == "iffalse" or op == "jump" or op == "farsjump") and cmd.script then
+        if type(cmd.script) == "table" then
+          local subClass, subMember, subEvent = scanScriptForTrainer(cmd.script, allScripts, visited)
+          foundClass = foundClass or subClass
+          foundMember = foundMember or subMember
+          foundEvent = foundEvent or subEvent
+        elseif type(cmd.script) == "string" and allScripts and not visited[cmd.script] then
+          visited[cmd.script] = true
+          local subClass, subMember, subEvent = scanScriptForTrainer(allScripts[cmd.script], allScripts, visited)
+          foundClass = foundClass or subClass
+          foundMember = foundMember or subMember
+          foundEvent = foundEvent or subEvent
+        end
+      end
+    end
+  end
+  return foundClass, foundMember, foundEvent
+end
+
+-- Helper to extract class, member index, and party records across Gen 1 and Gen 2 NPC structures
+local function extractTrainerInfo(npc, game, overworld)
+  local d = npc and npc.def
+  if not d then return nil end
+
+  local rawClass = d.trainerClass
+  local partyIndex = d.trainerParty or 1
+  local trainerEvent = nil
+
+  if not rawClass and d.trainer then
+    rawClass = d.trainer.class
+    partyIndex = d.trainer.member or 1
+    trainerEvent = d.trainer.event
+  end
+
+  -- If not on NPC definition, inspect script or match Gym Leader/Boss patterns
+  if not rawClass then
+    local allScripts = (overworld and overworld.scripts)
+        or (overworld and overworld.vm and overworld.vm.scripts)
+        or (game and game.data and (game.data.gen2Scripts or game.data.scripts))
+    if d.scriptKey and allScripts and allScripts[d.scriptKey] then
+      local scClass, scMember, scEvent = scanScriptForTrainer(allScripts[d.scriptKey], allScripts)
+      if scClass then
+        rawClass = scClass
+        partyIndex = scMember or partyIndex
+        trainerEvent = scEvent
+      end
+    end
+
+    if not rawClass then
+      local leader = matchLeaderPattern(d.sprite)
+          or matchLeaderPattern(d.spriteName)
+          or matchLeaderPattern(d.scriptKey)
+          or matchLeaderPattern(d.text)
+      if leader then
+        rawClass = leader.class
+        trainerEvent = leader.event
+      end
+    end
+  end
+
+  if not rawClass then return nil end
+
+  local trainers = game and game.data and (game.data.trainers or game.data.gen2Trainers)
+  local classRecord = nil
+  if trainers then
+    if trainers[rawClass] then
+      classRecord = trainers[rawClass]
+    elseif trainers.classes then
+      if trainers.classes[rawClass] then
+        classRecord = trainers.classes[rawClass]
+      elseif type(rawClass) == "number" then
+        for _, cls in pairs(trainers.classes) do
+          if type(cls) == "table" and cls.index == rawClass then
+            classRecord = cls
+            break
+          end
+        end
+      end
+    end
+  end
+
+  local classId = (classRecord and (classRecord.id or classRecord.name)) or rawClass
+  local team = resolveParty(classRecord, partyIndex)
+
+  return {
+    rawClass = rawClass,
+    classId = classId,
+    partyIndex = partyIndex,
+    classRecord = classRecord,
+    team = team,
+    trainerEvent = trainerEvent,
+    index = d.index,
+    scriptKey = d.scriptKey or (d.trainer and d.trainer.scriptKey),
+  }
+end
+
+-- Helper to determine if an NPC trainer is defeated across Gen 1 and Gen 2 world states
+local function isTrainerDefeated(self, npc, info)
+  if not npc or not npc.def then return false end
+  local d = npc.def
+  info = info or extractTrainerInfo(npc, (self and self.game), self)
+  local classId = info and info.classId
+
+  -- 1. Defeated check via Overworld methods (only accept true, fall through on false/nil)
+  if self.trainerDefeated then
+    local ok, defeated = pcall(self.trainerDefeated, self, npc)
+    if ok and defeated == true then return true end
+  end
+  if self.trainerBeaten then
+    local ok, beaten = pcall(self.trainerBeaten, self, d.trainer or d)
+    if ok and beaten == true then return true end
+  end
+
+  local norm = classId and normalizeClassId(classId)
+  if norm and norm:sub(1, 4) == "OPP_" then norm = norm:sub(5) end
+  local leaderInfo = (norm and LEADER_PATTERNS[norm]) or (classId and LEADER_PATTERNS[classId])
+
+  -- 2. Check badge via self:hasBadge
+  if leaderInfo and leaderInfo.badge and self.hasBadge then
+    local ok, has = pcall(self.hasBadge, self, leaderInfo.badge)
+    if ok and has then return true end
+  end
+
+  -- 3. Event flags in self.events or self.game.save.events
+  local events = self.events or (self.game and self.game.save and self.game.save.events)
+  if events then
+    local function checkFlag(flag)
+      if not flag then return false end
+      if events.get then
+        local ok, v = pcall(events.get, events, flag)
+        if ok and v then return true end
+      end
+      if type(events) == "table" and events[flag] then return true end
+      return false
+    end
+
+    if info and info.trainerEvent and checkFlag(info.trainerEvent) then
+      return true
+    end
+    if d.trainer and d.trainer.event and checkFlag(d.trainer.event) then
+      return true
+    end
+    if leaderInfo then
+      if leaderInfo.event and checkFlag(leaderInfo.event) then return true end
+      if leaderInfo.badgeEvent and checkFlag(leaderInfo.badgeEvent) then return true end
+    end
+  end
+
+  -- 4. Check save.player.badges or save.badges table
+  local save = (self.game and self.game.save) or self.save
+  local badges = (save and save.player and save.player.badges) or (save and save.badges)
+  if badges and leaderInfo and leaderInfo.badge then
+    if type(badges) == "table" and badges[leaderInfo.badge] then return true end
+  end
+
+  -- 5. Gen 1 numeric bitmask badges
+  if save and norm then
+    local GEN1_BADGE_BITS = {
+      BROCK = 1, MISTY = 2, LT_SURGE = 4, LTSURGE = 4,
+      ERIKA = 8, KOGA = 16, SABRINA = 32, BLAINE = 64, GIOVANNI = 128,
+    }
+    local bitMask = GEN1_BADGE_BITS[norm]
+    if bitMask and type(badges) == "number" then
+      if math.floor(badges / bitMask) % 2 == 1 then return true end
+    end
+  end
+
+  return false
+end
+
+-- Active rematch flag for Gen 2 battle construction
+local activeRematch = nil
+
 return function(mod)
   mod.exports.resolveLine = resolveLine
   mod.exports.resolveDecline = resolveDecline
   mod.exports.resolveWarning = resolveWarning
+  mod.exports.normalizeClassId = normalizeClassId
   mod.exports.levelGap = levelGap
   mod.exports.isPrizeLine = isPrizeLine
   mod.exports.scaleByPercent = scaleByPercent
   mod.exports.resolvePartyIndex = resolvePartyIndex
   mod.exports.resolveParty = resolveParty
+  mod.exports.extractTrainerInfo = extractTrainerInfo
+  mod.exports.isTrainerDefeated = isTrainerDefeated
 
   -- rematch earnings: a percentage of the usual battle money and
   -- experience, stepped in 10% intervals.  Money defaults to 0% (the
@@ -214,23 +598,29 @@ return function(mod)
   })
 
   local function offerRematch(self, npc, game, deps)
+    deps = deps or {}
+    local activeGame = (self and self.game) or game
     local d = npc.def
     local TextBox = deps.textBox or require("src.render.TextBox")
     local Runtime = deps.runtime or require("src.mods.Runtime")
-    local BattleState = deps.battleState or require("src.battle.BattleState")
+    local BattleState = deps.battleState or (pcall(require, "src.battle.BattleState") and require("src.battle.BattleState"))
     npc.frozen = true
-    npc:facePlayer(self.player)
+    if npc.facePlayer then npc:facePlayer(self.player) end
     local unfreeze = function() npc.frozen = false end
+
+    local info = extractTrainerInfo(npc, activeGame, self)
+    local classId = info and info.classId or (d and d.trainerClass)
 
     local function decline()
       -- the class reacts to the NO: mocking, or understanding for the
       -- wise classes.  The trainer's vanilla post-battle line follows as
       -- a second page, so the base-game text is never lost.
-      local header = game.data:trainerHeader(self.map.def.label, d.index)
-      local after = header and header.after and game.data.text[header.after]
-      local line = resolveDecline(d.trainerClass)
+      local header = activeGame and activeGame.data and activeGame.data.trainerHeader
+          and activeGame.data:trainerHeader(self.map and self.map.def and self.map.def.label, d.index)
+      local after = header and header.after and activeGame.data.text and activeGame.data.text[header.after]
+      local line = resolveDecline(classId)
       if after then line = line .. "\f" .. after end
-      game.stack:push(TextBox.new(game, line, unfreeze))
+      activeGame.stack:push(TextBox.new(activeGame, line, unfreeze))
     end
 
     local function accept()
@@ -238,30 +628,51 @@ return function(mod)
       -- trainer record's rematchIndex points at it (Yellow Legacy Changes
       -- appends the hack's L64-77 rematch teams this way).  Fall back to
       -- the trainer's own party when none is marked.
-      local record = game.data.trainers and game.data.trainers[d.trainerClass]
-      local partyIndex = resolvePartyIndex(record, d.trainerParty)
-      local team = resolveParty(record, partyIndex)
+      local partyIndex = resolvePartyIndex(info and info.classRecord, info and info.partyIndex or d.trainerParty)
+      local team = resolveParty(info and info.classRecord, partyIndex) or (info and info.team)
 
       local function battle()
-        Runtime.emit("world.trainer_engaged", { npc = npc,
-          trainerClass = d.trainerClass, partyIndex = partyIndex })
-        local header = game.data:trainerHeader(self.map.def.label, d.index)
-        local wonText = header and header.won and game.data.text[header.won]
-        local b = BattleState.newTrainer(game, d.trainerClass, partyIndex)
-        b.rematch = true
-        b.endBattleText = wonText and TextBox.substitute(game, wonText) or nil
-        b.onFinish = function(result)
-          self:afterBattle(result, b)
+        Runtime.emit("world.trainer_engaged", {
+          npc = npc,
+          trainerClass = info and info.rawClass or d.trainerClass,
+          partyIndex = partyIndex,
+          trainerEvent = info and info.trainerEvent,
+        })
+
+        if self.startTrainerScript then
+          -- Gen 2 engine overworld
+          local REMATCH_SCRIPT = {
+            { op = "loadtrainer", class = info and info.rawClass or d.trainerClass, member = partyIndex },
+            { op = "startbattle" },
+            { op = "reloadmapafterbattle" },
+          }
+          activeRematch = true
+          self:startTrainerScript(npc, REMATCH_SCRIPT, nil)
+        elseif self.pushBattle and BattleState and BattleState.newTrainer then
+          -- Gen 1 engine overworld
+          local header = activeGame and activeGame.data and activeGame.data.trainerHeader
+              and activeGame.data:trainerHeader(self.map and self.map.def and self.map.def.label, d.index)
+          local wonText = header and header.won and activeGame.data.text and activeGame.data.text[header.won]
+          local b = BattleState.newTrainer(activeGame, info and info.rawClass or d.trainerClass, partyIndex)
+          b.rematch = true
+          b.endBattleText = wonText and TextBox.substitute and TextBox.substitute(activeGame, wonText) or nil
+          b.onFinish = function(result)
+            if self.afterBattle then self:afterBattle(result, b) end
+            unfreeze()
+          end
+          self:pushBattle(b)
+        else
           unfreeze()
         end
-        self:pushBattle(b)
       end
 
       -- when the rematch team averages more than 10 levels above the
       -- player's party, the class warns in its own voice and asks again
-      local gap = levelGap(game.save.party, team)
+      local playerParty = (activeGame and activeGame.save and activeGame.save.party)
+          or (activeGame and activeGame.save and activeGame.save.player and activeGame.save.player.party)
+      local gap = levelGap(playerParty, team)
       if gap and gap > 10 then
-        game.stack:push(TextBox.new(game, resolveWarning(d.trainerClass), nil, {
+        activeGame.stack:push(TextBox.new(activeGame, resolveWarning(classId), nil, {
           choice = function(yes)
             if yes then battle() else decline() end
           end,
@@ -271,11 +682,12 @@ return function(mod)
       end
     end
 
-    game.stack:push(TextBox.new(game, resolveLine(d.trainerClass), nil, {
+    activeGame.stack:push(TextBox.new(activeGame, resolveLine(classId), nil, {
       choice = function(yes)
         if yes then accept() else decline() end
       end,
     }))
+    return true
   end
 
   -- deps injectable so the headless test can drive the wraps without the
@@ -283,89 +695,147 @@ return function(mod)
   local function install(game, deps)
     deps = deps or {}
     local Overworld = deps.overworld or require("src.world.OverworldController")
-    local BattleState = deps.battleState or require("src.battle.BattleState")
-    local TextBox = deps.textBox or require("src.render.TextBox")
-    local Runtime = deps.runtime or require("src.mods.Runtime")
-    local mapScripts = deps.mapScripts or require("data.scripts.init")
+    local BattleState = deps.battleState or (pcall(require, "src.battle.BattleState") and require("src.battle.BattleState"))
+    local mapScripts = deps.mapScripts or (pcall(require, "data.scripts.init") and require("data.scripts.init"))
 
     -- one wrap per boot; hot reload re-runs entry chunks without clearing
     -- the require cache, so the module table is the idempotence sentinel
-    if Overworld._rematchTalkWrapped then return end
-    Overworld._rematchTalkWrapped = true
+    if Overworld and not Overworld._rematchTalkWrapped then
+      Overworld._rematchTalkWrapped = true
 
-    local vanillaTalkTo = Overworld.talkTo
-    Overworld.talkTo = function(self, npc)
-      local d = npc.def
-      -- only the generic-trainer branch: scripted encounters (gym leaders,
-      -- rivals, story fights) keep their own flow, defeated or not
-      local scripted = mapScripts and mapScripts.talkScript(self.map.id, d.text)
-      if not scripted and d.trainerClass and self:trainerDefeated(npc) then
-        return offerRematch(self, npc, game, deps)
+      local vanillaTalkTo = Overworld.talkTo or function() return false end
+      Overworld.talkTo = function(self, npc)
+        local d = npc and npc.def
+        if not d then return vanillaTalkTo(self, npc) end
+
+        local activeGame = (self and self.game) or game
+        local info = extractTrainerInfo(npc, activeGame, self)
+        if info and isTrainerDefeated(self, npc, info) then
+          local scripted = mapScripts and mapScripts.talkScript
+              and mapScripts.talkScript(self.map and self.map.id, d.text)
+          local hasDedicatedRematch = resolvePartyIndex(info.classRecord, nil) ~= nil
+          if not scripted or hasDedicatedRematch or d.scriptKey or self.startTrainerScript then
+            return offerRematch(self, npc, activeGame, deps)
+          end
+        end
+        return vanillaTalkTo(self, npc)
       end
-      return vanillaTalkTo(self, npc)
     end
 
-    -- rematch money is a percentage of the usual prize (MODS > Trainer
-    -- Rematch, 0-100% in 10s): scale the class base money for this battle
+    -- Gen 1 BattleState wraps: rematch money is a percentage of the usual prize
+    -- (MODS > Trainer Rematch, 0-100% in 10s): scale the class base money for this battle
     -- only (never touch the shared data record), and at 0% drop the prize
     -- line entirely so no "You got ¥0" box appears
-    local vanillaFainted = BattleState.enemyMonFainted
-    BattleState.enemyMonFainted = function(self, ...)
-      if not self.rematch then return vanillaFainted(self, ...) end
-      local realTrainer = self.trainer
-      local pct = mod.options:get("rematchMoneyPct") or 0
-      self.trainer = setmetatable({
-        baseMoney = scaleByPercent(realTrainer.baseMoney, pct),
-      }, { __index = realTrainer })
-      local realSayNext = self.sayNext
-      if pct <= 0 then
-        self.sayNext = function(s, text)
-          if isPrizeLine(text) then return end
-          return realSayNext(s, text)
+    if BattleState and not BattleState._rematchFaintedWrapped then
+      BattleState._rematchFaintedWrapped = true
+
+      local vanillaFainted = BattleState.enemyMonFainted
+      if vanillaFainted then
+        BattleState.enemyMonFainted = function(self, ...)
+          if not self.rematch then return vanillaFainted(self, ...) end
+          local realTrainer = self.trainer
+          local pct = mod.options:get("rematchMoneyPct") or 0
+          if realTrainer then
+            self.trainer = setmetatable({
+              baseMoney = scaleByPercent(realTrainer.baseMoney, pct),
+            }, { __index = realTrainer })
+          end
+          local realSayNext = self.sayNext
+          if pct <= 0 and realSayNext then
+            self.sayNext = function(s, text)
+              if isPrizeLine(text) then return end
+              return realSayNext(s, text)
+            end
+          end
+          local ok, err = pcall(vanillaFainted, self, ...)
+          self.trainer = realTrainer
+          self.sayNext = realSayNext
+          if not ok then error(err, 2) end
         end
       end
-      local ok, err = pcall(vanillaFainted, self, ...)
-      self.trainer = realTrainer
-      self.sayNext = realSayNext
-      if not ok then error(err, 2) end
+
+      -- Pay Day is a reward too: nothing to collect on a rematch
+      local vanillaFinish = BattleState.finish
+      if vanillaFinish then
+        BattleState.finish = function(self)
+          if self.rematch then self.payDay = nil end
+          return vanillaFinish(self)
+        end
+      end
     end
 
-    -- rematch experience scales the final gained EXP (default 100%).  The
-    -- award ctx's applyShare takes a participant split, and the gain
-    -- formula floors it through math.max(1, split): scaling that divisor
-    -- by a percentage hits the floor for the usual single-participant
-    -- battle (0% -> split 0 -> the max(1, .) guard restores full EXP).  The
-    -- exp.gain hook sees the finished amount, so the award wrap only marks
-    -- the battle as a rematch while vanilla runs and the exp.gain wrap does
-    -- the scaling.
-    local rematchXpPct
-    mod.hooks:wrap("battle.exp_award", function(next, ctx)
-      local saved = rematchXpPct
-      rematchXpPct = ctx and ctx.battle and ctx.battle.rematch
-          and (mod.options:get("rematchXpPct") or 100) or nil
-      local ok, res = pcall(next, ctx)
-      rematchXpPct = saved
-      if not ok then error(res, 2) end
-      return res
-    end)
-    mod.hooks:wrap("exp.gain", function(next, ctx)
-      local pct = rematchXpPct
-      if pct and pct ~= 100 then
-        local gained = next(ctx)
-        if gained == nil then return nil end
-        return scaleByPercent(gained, pct)
-      end
-      return next(ctx)
-    end)
+    -- Gen 2 Battle wraps: intercept prize money & battle construction on Gen 2
+    local okGen2, Gen2Battle = pcall(require, "src.battle.gen2.Battle")
+    if okGen2 and Gen2Battle and not Gen2Battle._rematchWrapped then
+      Gen2Battle._rematchWrapped = true
 
-    -- Pay Day is a reward too: nothing to collect on a rematch
-    local vanillaFinish = BattleState.finish
-    BattleState.finish = function(self)
-      if self.rematch then self.payDay = nil end
-      return vanillaFinish(self)
+      local vanillaBattleNew = Gen2Battle.new
+      if vanillaBattleNew then
+        Gen2Battle.new = function(opts)
+          local b = vanillaBattleNew(opts)
+          if b and (activeRematch or (opts and opts.rematch)) then
+            b.rematch = true
+            activeRematch = nil
+          end
+          return b
+        end
+      end
+
+      local vanillaAwardPrize = Gen2Battle.awardPrizeMoney
+      if vanillaAwardPrize then
+        Gen2Battle.awardPrizeMoney = function(self)
+          if not self.rematch then return vanillaAwardPrize(self) end
+          local pct = mod.options:get("rematchMoneyPct") or 0
+          if pct <= 0 then
+            self.payDay = nil
+            self.prize = { quarter = 0, total = 0, toMom = 0, mode = 0, wallet = 0, saved = 0 }
+            return self.prize
+          end
+          local realTrainer = self.trainer
+          if realTrainer then
+            self.trainer = setmetatable({
+              baseMoney = scaleByPercent(realTrainer.baseMoney, pct),
+            }, { __index = realTrainer })
+          end
+          local ok, res = pcall(vanillaAwardPrize, self)
+          self.trainer = realTrainer
+          if not ok then error(res, 2) end
+          return res
+        end
+      end
     end
   end
   mod.exports.install = install
+
+  -- rematch experience scales the final gained EXP (default 100%).  The
+  -- award ctx's applyShare takes a participant split, and the gain
+  -- formula floors it through math.max(1, split): scaling that divisor
+  -- by a percentage hits the floor for the usual single-participant
+  -- battle (0% -> split 0 -> the max(1, .) guard restores full EXP).  The
+  -- exp.gain hook sees the finished amount, so the award wrap only marks
+  -- the battle as a rematch while vanilla runs and the exp.gain wrap does
+  -- the scaling.
+  local rematchXpPct
+  mod.hooks:wrap("battle.exp_award", function(next, ctx)
+    local saved = rematchXpPct
+    rematchXpPct = ctx and ctx.battle and ctx.battle.rematch
+        and (mod.options:get("rematchXpPct") or 100) or nil
+    local ok, res = pcall(next, ctx)
+    rematchXpPct = saved
+    if not ok then error(res, 2) end
+    return res
+  end)
+  mod.hooks:wrap("exp.gain", function(next, ctx)
+    local pct = rematchXpPct
+    if pct and pct ~= 100 then
+      local gained = next(ctx)
+      if gained == nil then return nil end
+      return scaleByPercent(gained, pct)
+    end
+    return next(ctx)
+  end)
+
+  install()
 
   mod.events:on("game.ready", function(ev)
     install(ev.game)

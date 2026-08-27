@@ -35,9 +35,9 @@ T.eq(ex.resolveLine("OPP_LANCE"):find("dragons", 1, true) ~= nil, true,
   "LANCE line is in his voice")
 T.eq(ex.resolveLine("OPP_UNUSED_JUGGLER"):find("juggling", 1, true) ~= nil, true,
   "UNUSED_JUGGLER gets a line too")
-T.eq(ex.resolveLine("OPP_FIX_YOUNGSTER"), "You're looking\nfor a rematch?",
+T.eq(ex.resolveLine("OPP_FIX_YOUNGSTER"), "Looking for a\nrematch with me?",
   "unknown class falls back to the default prompt")
-T.eq(ex.resolveLine(nil), "You're looking\nfor a rematch?",
+T.eq(ex.resolveLine(nil), "Looking for a\nrematch with me?",
   "nil class falls back to the default prompt")
 
 -- ------------------------------------------------ pure decline resolution
@@ -48,9 +48,9 @@ T.eq(ex.resolveDecline("OPP_KOGA"):find("Fear", 1, true) ~= nil, true,
   "wise classes answer with understanding")
 T.eq(ex.resolveDecline("OPP_GENTLEMAN"):find("gentleman", 1, true) ~= nil, true,
   "polite classes stay polite")
-T.eq(ex.resolveDecline("OPP_FIX_YOUNGSTER"), "Ha! Scared of\na rematch, are\nyou?",
+T.eq(ex.resolveDecline("OPP_FIX_YOUNGSTER"), "Ha! Scared of a\nrematch, are you?",
   "unknown class falls back to the default decline")
-T.eq(ex.resolveDecline(nil), "Ha! Scared of\na rematch, are\nyou?",
+T.eq(ex.resolveDecline(nil), "Ha! Scared of a\nrematch, are you?",
   "nil class falls back to the default decline")
 
 -- ------------------------------------------------ prize-line filter
@@ -261,6 +261,7 @@ local mistyBattles = #calls.battles
 local pushedBefore = #pushed
 local mistyNpc = freshNpc()
 mistyNpc.def.trainerClass = "OPP_FIX_MISTY"
+scriptedFlag.value = true
 overworldStub.talkTo(ow, mistyNpc)
 T.eq(#pushed, pushedBefore + 1, "the rematch prompt is pushed")
 pushed[#pushed].opts.choice(true)
@@ -284,6 +285,7 @@ pushed[#pushed].opts.choice(true)
 pushed[#pushed].opts.choice(false)
 T.eq(#calls.battles, lBefore, "declining the warning starts no battle")
 T.eq(#pushed, pushedL + 3, "the decline line follows")
+scriptedFlag.value = false
 
 -- M: a small level gap skips the warning and battles directly
 local lvlBattles = #calls.battles
@@ -348,5 +350,313 @@ run.loader.modOptions["trainer_rematch"].rematchXpPct = 100
 T.eq(gainThroughAward({ rematch = true }, 1), 1000, "100% rematch XP is unchanged")
 run.loader.modOptions["trainer_rematch"] = nil
 
+-- ------------------------------------------------ Gen 2 Target & Loading
+
+local manifest = run.loader.mods.trainer_rematch.manifest
+T.neq(manifest.games, nil, "manifest has games list")
+T.eq(type(manifest.games), "table", "manifest games is a table")
+local gamesStr = table.concat(manifest.games, ",")
+T.eq(gamesStr:find("gen1", 1, true) ~= nil or gamesStr:find("red", 1, true) ~= nil, true,
+  "manifest covers Gen 1")
+T.eq(gamesStr:find("gen2", 1, true) ~= nil or gamesStr:find("gold", 1, true) ~= nil, true,
+  "manifest covers Gen 2")
+
+local runGen2 = T.sdk.loadMod("mods/trainer_rematch", { data = T.fixtures.fresh(), generation = 2 })
+T.eq(#runGen2.errors, 0, "loads clean on Gen 2")
+T.eq(runGen2.mod and runGen2.mod.state, "loaded", "runs on Gen 2 with loaded state")
+runGen2.release()
+
+-- ------------------------------------------------ Gen 2 Trainer Lines & Aliases
+
+T.eq(ex.resolveLine("FALKNER"):find("training", 1, true) ~= nil, true,
+  "FALKNER line resolves (bare name)")
+T.eq(ex.resolveLine("OPP_FALKNER"):find("training", 1, true) ~= nil, true,
+  "OPP_FALKNER line resolves (OPP prefix)")
+T.eq(ex.resolveLine("WHITNEY"):find("cry", 1, true) ~= nil, true,
+  "WHITNEY line resolves")
+T.eq(ex.resolveLine("BUGSY"):find("BUG", 1, true) ~= nil, true,
+  "BUGSY line resolves")
+T.eq(ex.resolveLine("MORTY"):find("Ghosts", 1, true) ~= nil, true,
+  "MORTY line resolves")
+T.eq(ex.resolveLine("CHUCK"):find("HRAAGH", 1, true) ~= nil, true,
+  "CHUCK line resolves")
+T.eq(ex.resolveLine("JASMINE"):find("steel", 1, true) ~= nil, true,
+  "JASMINE line resolves")
+T.eq(ex.resolveLine("PRYCE"):find("Winter", 1, true) ~= nil, true,
+  "PRYCE line resolves")
+T.eq(ex.resolveLine("CLAIR"):find("dragons", 1, true) ~= nil, true,
+  "CLAIR line resolves")
+T.eq(ex.resolveLine("WILL"):find("foresaw", 1, true) ~= nil, true,
+  "WILL line resolves")
+T.eq(ex.resolveLine("KAREN"):find("favorites", 1, true) ~= nil, true,
+  "KAREN line resolves")
+T.eq(ex.resolveLine("JANINE"):find("Ninja", 1, true) ~= nil, true,
+  "JANINE line resolves")
+T.eq(ex.resolveLine("RED"):find("%.%.%.", 1, false) ~= nil, true,
+  "RED line resolves")
+T.eq(ex.resolveLine("BLUE"):find("Smell ya later", 1, true) ~= nil, true,
+  "BLUE line resolves")
+T.eq(ex.resolveLine("CAL"):find("skills", 1, true) ~= nil, true,
+  "CAL line resolves")
+T.eq(ex.resolveLine("SCHOOLBOY"):find("theory", 1, true) ~= nil, true,
+  "SCHOOLBOY line resolves")
+T.eq(ex.resolveLine("SKIER"):find("Snow", 1, true) ~= nil, true,
+  "SKIER line resolves")
+T.eq(ex.resolveLine("TEACHER"):find("quiz", 1, true) ~= nil, true,
+  "TEACHER line resolves")
+T.eq(ex.resolveLine("FIREBREATHER"):find("fire", 1, true) ~= nil, true,
+  "FIREBREATHER line resolves")
+T.eq(ex.resolveLine("SAGE"):find("spirits", 1, true) ~= nil, true,
+  "SAGE line resolves")
+T.eq(ex.resolveLine("MEDIUM"):find("Spirits", 1, true) ~= nil, true,
+  "MEDIUM line resolves")
+T.eq(ex.resolveLine("BOARDER"):find("moves", 1, true) ~= nil, true,
+  "BOARDER line resolves")
+T.eq(ex.resolveLine("POKEFANM"):find("Darling", 1, true) ~= nil, true,
+  "POKEFANM line resolves")
+T.eq(ex.resolveLine("POKEFANF"):find("sweet", 1, true) ~= nil, true,
+  "POKEFANF line resolves")
+T.eq(ex.resolveLine("KIMONO_GIRL"):find("Dance", 1, true) ~= nil, true,
+  "KIMONO_GIRL line resolves")
+T.eq(ex.resolveLine("TWINS"):find("Twice", 1, true) ~= nil, true,
+  "TWINS line resolves")
+T.eq(ex.resolveLine("OFFICER"):find("Halt", 1, true) ~= nil, true,
+  "OFFICER line resolves")
+T.eq(ex.resolveLine("EXECUTIVEM"):find("Rocket", 1, true) ~= nil, true,
+  "EXECUTIVEM line resolves")
+T.eq(ex.resolveLine("EXECUTIVEF"):find("meddling", 1, true) ~= nil, true,
+  "EXECUTIVEF line resolves")
+T.eq(ex.resolveLine("MYSTICALMAN"):find("Passion", 1, true) ~= nil, true,
+  "MYSTICALMAN line resolves")
+
+-- Aliases
+T.eq(ex.resolveLine("COOLTRAINERM"):find("stronger", 1, true) ~= nil, true,
+  "COOLTRAINERM aliases to COOLTRAINER_M")
+T.eq(ex.resolveLine("COOLTRAINERF"):find("trained", 1, true) ~= nil, true,
+  "COOLTRAINERF aliases to COOLTRAINER_F")
+T.eq(ex.resolveLine("BLACKBELT_T"):find("Trained", 1, true) ~= nil, true,
+  "BLACKBELT_T aliases to BLACKBELT")
+T.eq(ex.resolveLine("PSYCHIC_T"):find("return", 1, true) ~= nil, true,
+  "PSYCHIC_T aliases to PSYCHIC_TR")
+T.eq(ex.resolveLine("SWIMMERM"):find("water", 1, true) ~= nil, true,
+  "SWIMMERM aliases to SWIMMER")
+T.eq(ex.resolveLine("SWIMMERF"):find("water", 1, true) ~= nil, true,
+  "SWIMMERF aliases to SWIMMER")
+T.eq(ex.resolveLine("CAMPER"):find("harder", 1, true) ~= nil, true,
+  "CAMPER aliases to JR_TRAINER_M")
+T.eq(ex.resolveLine("PICNICKER"):find("practiced", 1, true) ~= nil, true,
+  "PICNICKER aliases to JR_TRAINER_F")
+T.eq(ex.resolveLine("GUITARIST"):find("Encore", 1, true) ~= nil, true,
+  "GUITARIST aliases to ROCKER")
+T.eq(ex.resolveLine("GRUNTM"):find("Rocket", 1, true) ~= nil, true,
+  "GRUNTM aliases to ROCKET")
+T.eq(ex.resolveLine("GRUNTF"):find("Rocket", 1, true) ~= nil, true,
+  "GRUNTF aliases to ROCKET")
+T.eq(ex.resolveLine("CHAMPION"):find("dragons", 1, true) ~= nil, true,
+  "CHAMPION aliases to LANCE")
+T.eq(ex.resolveLine("POKEMON_PROF"):find("friend", 1, true) ~= nil, true,
+  "POKEMON_PROF aliases to PROF_OAK")
+
+-- Gen 2 Declines & Warnings
+T.eq(ex.resolveDecline("WHITNEY"):find("mean", 1, true) ~= nil, true,
+  "WHITNEY decline line resolves")
+T.eq(ex.resolveDecline("FALKNER"):find("skies", 1, true) ~= nil, true,
+  "FALKNER decline line resolves")
+T.eq(ex.resolveWarning("CLAIR"):find("Dragon", 1, true) ~= nil, true,
+  "CLAIR warning resolves")
+T.eq(ex.resolveWarning("RED"):find("%.%.%.", 1, false) ~= nil, true,
+  "RED warning resolves")
+
+-- ------------------------------------------------ Gen 2 NPC Structure & Overworld
+
+local gen2Game = {
+  data = {
+    trainers = {
+      classes = {
+        YOUNGSTER = { id = "YOUNGSTER", name = "YOUNGSTER", index = 24,
+          trainers = { { id = "JOEY1", name = "JOEY", party = { { level = 4, species = "RATTATA" } } } } },
+        FALKNER = { id = "FALKNER", name = "FALKNER", index = 1,
+          trainers = { { id = "FALKNER1", name = "FALKNER", party = { { level = 7, species = "PIDGEY" }, { level = 9, species = "PIDGEOTTO" } } } } },
+      }
+    }
+  },
+  save = {
+    party = { { level = 12 } },
+    events = { [100] = true },
+  },
+  stack = { push = function(_, s) table.insert(pushed, s) end },
+}
+
+local gen2Npc = {
+  def = {
+    trainer = { class = 24, member = 1, event = 100 },
+    index = 2,
+  },
+  frozen = false,
+  facePlayer = function() end,
+}
+
+local gen2StartedScript = nil
+local gen2Ow = {
+  game = gen2Game,
+  player = {},
+  events = { get = function(_, ev) return ev == 100 end },
+  trainerBeaten = function(self, record)
+    return record and record.event == 100
+  end,
+  startTrainerScript = function(self, npc, script, sight)
+    gen2StartedScript = script
+    return true
+  end,
+}
+
+T.eq(ex.isTrainerDefeated(gen2Ow, gen2Npc), true, "isTrainerDefeated detects beaten Gen 2 trainer")
+
+local info = ex.extractTrainerInfo(gen2Npc, gen2Game)
+T.neq(info, nil, "extractTrainerInfo extracts Gen 2 trainer struct")
+T.eq(info.classId, "YOUNGSTER", "classId resolved from classes index")
+T.eq(info.partyIndex, 1, "member index extracted")
+T.eq(#info.team, 1, "team roster extracted")
+
+-- Offer rematch on Gen 2 overworld
+pushed = {}
+local gen2TalkTo = overworldStub.talkTo
+overworldStub.talkTo(gen2Ow, gen2Npc)
+T.eq(#pushed, 1, "rematch prompt pushed on Gen 2")
+T.eq(pushed[1].text:find("shorts", 1, true) ~= nil, true, "shows YOUNGSTER challenge line")
+
+-- Accept on Gen 2 starts trainer script
+pushed[1].opts.choice(true)
+T.neq(gen2StartedScript, nil, "trainer script started on accept")
+T.eq(gen2StartedScript[1].op, "loadtrainer", "script loads trainer")
+T.eq(gen2StartedScript[1].member, 1, "script loads member 1")
+T.eq(gen2StartedScript[2].op, "startbattle", "script starts battle")
+
+-- ------------------------------------------------ Gen 2 Battle Prize & Pay Day
+
+local gen2BattleClass = {
+  awardPrizeMoney = function(self)
+    local prize = (self.trainer.baseMoney or 0) * (self.enemyParty and self.enemyParty[1].level or 1)
+    self.save.player.money = self.save.player.money + prize
+    self.prize = { total = prize }
+    return self.prize
+  end,
+  new = function(opts)
+    return {
+      trainer = opts.trainer,
+      save = opts.save,
+      enemyParty = opts.party,
+    }
+  end
+}
+
+-- Re-install with Gen 2 battle stub
+package.loaded["src.battle.gen2.Battle"] = gen2BattleClass
+ex.install(gen2Game, { overworld = overworldStub, textBox = textBoxStub, runtime = runtimeStub })
+
+local gen2Save = { player = { money = 5000 } }
+local gen2RematchBattle = {
+  rematch = true,
+  trainer = { baseMoney = 200 },
+  enemyParty = { { level = 10 } },
+  save = gen2Save,
+  payDay = 400,
+}
+setmetatable(gen2RematchBattle, { __index = gen2BattleClass })
+
+-- 0% money: prize is zeroed and payDay cleared
+gen2BattleClass.awardPrizeMoney(gen2RematchBattle)
+T.eq(gen2Save.player.money, 5000, "0% rematch money awards no money in Gen 2")
+T.eq(gen2RematchBattle.payDay, nil, "payDay suppressed on Gen 2 rematch")
+
+-- 50% money: prize is scaled by 50%
+run.loader.modOptions["trainer_rematch"] = { rematchMoneyPct = 50 }
+local gen2RematchBattle50 = {
+  rematch = true,
+  trainer = { baseMoney = 200 },
+  enemyParty = { { level = 10 } },
+  save = gen2Save,
+}
+setmetatable(gen2RematchBattle50, { __index = gen2BattleClass })
+gen2BattleClass.awardPrizeMoney(gen2RematchBattle50)
+T.eq(gen2Save.player.money, 5000 + 1000, "50% rematch money awards scaled money (50%) in Gen 2")
+run.loader.modOptions["trainer_rematch"] = nil
+
+-- Non-rematch battle awards full money
+local gen2NormalBattle = {
+  rematch = false,
+  trainer = { baseMoney = 200 },
+  enemyParty = { { level = 10 } },
+  save = gen2Save,
+}
+setmetatable(gen2NormalBattle, { __index = gen2BattleClass })
+gen2BattleClass.awardPrizeMoney(gen2NormalBattle)
+T.eq(gen2Save.player.money, 6000 + 2000, "normal battle awards full money in Gen 2")
+
+-- ------------------------------------------------ Gen 2 Gym Leader Rematches
+
+local falknerNpc = {
+  def = {
+    scriptKey = "VioletGym_FalknerScript",
+    index = 1,
+  },
+  frozen = false,
+  facePlayer = function() end,
+}
+
+local falknerOwBeaten = {
+  game = gen2Game,
+  player = {},
+  events = { get = function(_, ev) return ev == 1213 end },
+  trainerBeaten = function(self, record)
+    -- Matches real engine behavior: returns false for Gym Leader objects without record.event
+    if not (record and record.event) then return false end
+    return false
+  end,
+  scripts = {
+    VioletGym_FalknerScript = {
+      { op = "checkevent", event = 1213 },
+      { op = "loadtrainer", class = "FALKNER", member = 1 },
+      { op = "startbattle" },
+    }
+  },
+  startTrainerScript = function(self, npc, script)
+    gen2StartedScript = script
+    return true
+  end,
+}
+
+local falknerInfo = ex.extractTrainerInfo(falknerNpc, gen2Game, falknerOwBeaten)
+T.neq(falknerInfo, nil, "extractTrainerInfo detects Falkner from scriptKey")
+T.eq(falknerInfo.classId, "FALKNER", "Falkner classId resolved")
+T.eq(ex.isTrainerDefeated(falknerOwBeaten, falknerNpc, falknerInfo), true,
+  "Falkner detected as defeated when EVENT_BEAT_FALKNER is set")
+
+-- Talk to beaten Falkner -> rematch offered
+pushed = {}
+overworldStub.talkTo(falknerOwBeaten, falknerNpc)
+T.eq(#pushed, 1, "rematch prompt offered for beaten Falkner")
+T.eq(pushed[1].text:find("training", 1, true) ~= nil, true, "shows Falkner challenge line")
+
+-- Accept -> starts Falkner battle
+gen2StartedScript = nil
+pushed[1].opts.choice(true)
+T.neq(gen2StartedScript, nil, "starts battle script for Falkner")
+T.eq(gen2StartedScript[1].class, "FALKNER", "loads Falkner class")
+T.eq(gen2StartedScript[1].member, 1, "loads member 1")
+
+-- Undefeated Falkner falls through to vanilla
+local falknerOwUndefeated = {
+  game = gen2Game,
+  player = {},
+  events = { get = function(_, ev) return false end },
+  scripts = falknerOwBeaten.scripts,
+}
+pushed = {}
+local talkReturned = overworldStub.talkTo(falknerOwUndefeated, falknerNpc)
+T.eq(#pushed, 0, "no rematch prompt for undefeated Falkner")
+T.neq(talkReturned, true, "falls through to vanilla script for undefeated Falkner")
+
 run.release()
 T.finish("trainer_rematch")
+
