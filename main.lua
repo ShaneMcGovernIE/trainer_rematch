@@ -346,26 +346,30 @@ local function isPrizeLine(text)
     and text:find("for winning", 1, true) ~= nil
 end
 
--- Leader flags and badge events for Gen 2 and Gen 1
+-- Leader flags and badge events for Gen 2 and Gen 1.  The badge a leader hands
+-- over IS their beaten state on Gen 2 (the ENGINE_*BADGE id and the badge's
+-- wJohtoBadges bit are the same write), so the badge name is the whole record
+-- of "this leader is finished" -- the ids are not repeated here, because the
+-- ENGINE_* numbering moves between Gold and Crystal.
 local LEADER_PATTERNS = {
-  FALKNER  = { class = "FALKNER", event = 1213, badge = "ZEPHYR", engineFlag = 26 },
-  BUGSY    = { class = "BUGSY", event = 1214, badge = "HIVE", engineFlag = 27 },
-  WHITNEY  = { class = "WHITNEY", event = 1215, badge = "PLAIN", engineFlag = 28 },
-  MORTY    = { class = "MORTY", event = 1216, badge = "FOG", engineFlag = 29 },
-  JASMINE  = { class = "JASMINE", event = 1217, badge = "MINERAL", engineFlag = 30 },
-  CHUCK    = { class = "CHUCK", event = 1218, badge = "STORM", engineFlag = 31 },
-  PRYCE    = { class = "PRYCE", event = 1219, badge = "GLACIER", engineFlag = 32 },
-  CLAIR    = { class = "CLAIR", event = 1220, badge = "RISING", engineFlag = 33 },
-  BROCK    = { class = "BROCK", event = 1221, badge = "BOULDER", engineFlag = 34 },
-  MISTY    = { class = "MISTY", event = 1222, badge = "CASCADE", engineFlag = 35 },
-  SURGE    = { class = "LT_SURGE", event = 1223, badge = "THUNDER", engineFlag = 36 },
-  LT_SURGE = { class = "LT_SURGE", event = 1223, badge = "THUNDER", engineFlag = 36 },
-  LTSURGE  = { class = "LT_SURGE", event = 1223, badge = "THUNDER", engineFlag = 36 },
-  ERIKA    = { class = "ERIKA", event = 1224, badge = "RAINBOW", engineFlag = 37 },
-  JANINE   = { class = "JANINE", event = 1225, badge = "SOUL", engineFlag = 38 },
-  SABRINA  = { class = "SABRINA", event = 1226, badge = "MARSH", engineFlag = 39 },
-  BLAINE   = { class = "BLAINE", event = 1227, badge = "VOLCANO", engineFlag = 40 },
-  BLUE     = { class = "BLUE", event = 1228, badge = "EARTH", engineFlag = 41 },
+  FALKNER  = { class = "FALKNER", event = 1213, badge = "ZEPHYR" },
+  BUGSY    = { class = "BUGSY", event = 1214, badge = "HIVE" },
+  WHITNEY  = { class = "WHITNEY", event = 1215, badge = "PLAIN" },
+  MORTY    = { class = "MORTY", event = 1216, badge = "FOG" },
+  JASMINE  = { class = "JASMINE", event = 1217, badge = "MINERAL" },
+  CHUCK    = { class = "CHUCK", event = 1218, badge = "STORM" },
+  PRYCE    = { class = "PRYCE", event = 1219, badge = "GLACIER" },
+  CLAIR    = { class = "CLAIR", event = 1220, badge = "RISING" },
+  BROCK    = { class = "BROCK", event = 1221, badge = "BOULDER" },
+  MISTY    = { class = "MISTY", event = 1222, badge = "CASCADE" },
+  SURGE    = { class = "LT_SURGE", event = 1223, badge = "THUNDER" },
+  LT_SURGE = { class = "LT_SURGE", event = 1223, badge = "THUNDER" },
+  LTSURGE  = { class = "LT_SURGE", event = 1223, badge = "THUNDER" },
+  ERIKA    = { class = "ERIKA", event = 1224, badge = "RAINBOW" },
+  JANINE   = { class = "JANINE", event = 1225, badge = "SOUL" },
+  SABRINA  = { class = "SABRINA", event = 1226, badge = "MARSH" },
+  BLAINE   = { class = "BLAINE", event = 1227, badge = "VOLCANO" },
+  BLUE     = { class = "BLUE", event = 1228, badge = "EARTH" },
   RED      = { class = "RED", event = 1890 },
   WILL     = { class = "WILL" },
   KOGA     = { class = "KOGA" },
@@ -384,6 +388,192 @@ local function matchLeaderPattern(str)
     end
   end
   return nil
+end
+
+-- the Gym Leader record a trainer class belongs to, if the class is one
+local function resolveLeader(classId)
+  local key = normalizeClassId(classId)
+  if key and key:sub(1, 4) == "OPP_" then key = key:sub(5) end
+  return (key and LEADER_PATTERNS[key]) or (classId and LEADER_PATTERNS[classId])
+end
+
+-- ------------------------------------------------------------- badge stores
+--
+-- Gen 2 keeps the sixteen badges on the player: the Johto eight in
+-- save.player.badges and the Kanto eight in save.player.kantoBadges, keyed by
+-- name (World:setEngineFlag routes an ENGINE_*BADGE id to the badge's own
+-- name), with the badge's bit position accepted as the fallback key, which is
+-- how FieldMoves.hasBadge and Battle:hasBadge read a converted cart save.
+-- Gen 1 keeps them as bag items instead (src/inventory/Badges.lua writes
+-- save.inventory["BOULDERBADGE"]).
+local JOHTO_BADGE_ORDER = {
+  "ZEPHYR", "HIVE", "PLAIN", "FOG", "MINERAL", "STORM", "GLACIER", "RISING",
+}
+local KANTO_BADGE_ORDER = {
+  "BOULDER", "CASCADE", "THUNDER", "RAINBOW",
+  "SOUL", "MARSH", "VOLCANO", "EARTH",
+}
+
+-- which save store holds this badge, and its bit position inside it
+local function badgeStoreOf(name)
+  for index, badge in ipairs(JOHTO_BADGE_ORDER) do
+    if badge == name then return "badges", index end
+  end
+  for index, badge in ipairs(KANTO_BADGE_ORDER) do
+    if badge == name then return "kantoBadges", index end
+  end
+  return nil
+end
+
+-- true when the badge is in hand, false when the store is there and the player
+-- does not have it, nil when this save carries no badge store this build can
+-- read.  Callers only let the definite false change anything, so an unfamiliar
+-- save layout can never cost a rematch that used to be offered.
+local function badgeOwned(self, name)
+  if not name then return nil end
+  local save = (self and self.game and self.game.save) or (self and self.save)
+  if not save then
+    local ok, Game = pcall(require, "src.core.Game")
+    if ok and Game and Game.save then save = Game.save end
+  end
+  if not save then return nil end
+
+  local store, position = badgeStoreOf(name)
+  local owned = store and save.player and save.player[store]
+  if type(owned) == "table" then
+    if owned[name] then return true end
+    if position and owned[position] == true then return true end
+    return false
+  end
+
+  local inventory = save.inventory
+  if type(inventory) == "table" then
+    return (inventory[name] or inventory[name .. "BADGE"]) and true or false
+  end
+
+  return nil
+end
+
+-- ------------------------------------------------- "still owes" this talk
+--
+-- On Gold/Silver/Crystal a beaten Gym Leader is not finished with the player
+-- yet: the battle only sets EVENT_BEAT_<leader>, and the badge (and often a TM)
+-- follows from their own talk.  Whitney is the plain case -- she cries, blocks
+-- the door, and only hands over PLAINBADGE on the talk after the trip-wire at
+-- (8,5) -- while Falkner and the rest of the Johto leaders re-offer their TM to
+-- a party that was full, Erika and Janine hand theirs over on a later talk, and
+-- Clair's RISINGBADGE comes from the Dragon's Den elder with her TM still to
+-- come.  Taking one of those talks for the rematch prompt is what left players
+-- unable to get the badge at all (and would quietly cost the TM), so a leader
+-- keeps their own conversation until the script has nothing left to give.
+--
+-- The walk below follows only what it understands: event and engine-flag
+-- checks, the branches they select, and the ops that are pure talk.  Anything
+-- else -- a setevent, a giveitem, an op that needs the VM -- counts as
+-- unfinished business, so a script this mod cannot read keeps its talk rather
+-- than losing whatever it was going to hand over.
+local TALK_ONLY_OPS = {
+  faceplayer = true, opentext = true, writetext = true, waitbutton = true,
+  promptbutton = true, closetext = true, playsound = true, waitsfx = true,
+  waitfanfare = true, itemnotify = true, getitemname = true, turnobject = true,
+  showemote = true, applymovement = true, pause = true, wait = true,
+  yesorno = true, jumptext = true, jumptextfaceplayer = true,
+  ["end"] = true,
+}
+local CHECK_OPS = { checkevent = true, checkflag = true }
+local BRANCH_OPS = { iftrue = true, iffalse = true }
+local JUMP_OPS = { jump = true, sjump = true, farsjump = true }
+local TALK_DEPTH_LIMIT = 8
+
+local function talkStillHandsOver(ops, allScripts, ctx, depth)
+  depth = depth or 0
+  if type(ops) ~= "table" or depth > TALK_DEPTH_LIMIT then return true end
+  local pending
+  for _, cmd in ipairs(ops) do
+    if type(cmd) == "table" then
+      local op = cmd.op
+      if op == "end" then return false end
+      if CHECK_OPS[op] then
+        pending = ctx.check(op, cmd.event or cmd.flag)
+      elseif BRANCH_OPS[op] then
+        -- the VM jumps out of the list when the branch is taken, so the
+        -- target answers for the whole talk
+        local taken = (op == "iftrue") == (pending == true)
+        pending = nil
+        if taken then
+          local target = cmd.script
+          if type(target) == "string" then target = allScripts[target] end
+          return talkStillHandsOver(target, allScripts, ctx, depth + 1)
+        end
+      elseif op == "scall" then
+        -- a call returns: unfinished business inside it is the talk's too
+        local target = type(cmd.script) == "string" and allScripts[cmd.script] or cmd.script
+        if talkStillHandsOver(target, allScripts, ctx, depth + 1) then return true end
+      elseif JUMP_OPS[op] then
+        local target = type(cmd.script) == "string" and allScripts[cmd.script] or cmd.script
+        return talkStillHandsOver(target, allScripts, ctx, depth + 1)
+      elseif not TALK_ONLY_OPS[op] then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+-- the Gen 2 script pool the NPC defs point into (extractTrainerInfo reads the
+-- same one); nil on Gen 1, which has no such table and no multi-talk hand-over
+local function gen2ScriptPool(self, game)
+  if self and type(self.scripts) == "table" then return self.scripts end
+  if self and self.vm and type(self.vm.scripts) == "table" then return self.vm.scripts end
+  if game and game.data and type(game.data.gen2Scripts) == "table" then
+    return game.data.gen2Scripts
+  end
+  return nil
+end
+
+-- what checkevent / checkflag answer for the live save
+local function talkContext(self, game)
+  local save = (self and self.game and self.game.save) or (self and self.save)
+      or (game and game.save)
+  local events = (self and self.events) or (save and save.events)
+  local function eventSet(id)
+    if id == nil or type(events) ~= "table" or type(events.get) ~= "function" then
+      return false
+    end
+    local ok, value = pcall(events.get, events, id)
+    return ok and value and true or false
+  end
+  local function flagSet(id)
+    if id == nil then return false end
+    if self and type(self.engineFlag) == "function" then
+      local ok, value = pcall(self.engineFlag, self, id)
+      if ok and value ~= nil then return value and true or false end
+    end
+    local flags = save and save.engineFlags
+    return type(flags) == "table" and flags[id] == true or false
+  end
+  return {
+    check = function(op, id)
+      if op == "checkevent" then return eventSet(id) end
+      return flagSet(id)
+    end,
+  }
+end
+
+-- a beaten Gym Leader whose badge the player does not hold yet, or whose
+-- script still hands something over, keeps their own conversation
+local function leaderStillHandingOver(self, game, classId, d)
+  local leaderInfo = resolveLeader(classId)
+  if not (leaderInfo and leaderInfo.badge) then return false end
+
+  local owned = badgeOwned(self, leaderInfo.badge)
+  if owned == false then return true end
+  if owned ~= true then return false end
+
+  local allScripts = gen2ScriptPool(self, game)
+  local ops = allScripts and d and d.scriptKey and allScripts[d.scriptKey]
+  if type(ops) ~= "table" then return false end
+  return talkStillHandsOver(ops, allScripts, talkContext(self, game))
 end
 
 local function scanScriptForTrainer(scriptList, allScripts, visited)
@@ -515,9 +705,9 @@ local function isTrainerDefeated(self, npc, info)
 
   local norm = classId and normalizeClassId(classId)
   if norm and norm:sub(1, 4) == "OPP_" then norm = norm:sub(5) end
-  local leaderInfo = (norm and LEADER_PATTERNS[norm]) or (classId and LEADER_PATTERNS[classId])
+  local leaderInfo = resolveLeader(classId)
 
-  -- 2. Check badge via self:hasBadge
+  -- 2. Check the leader's badge via self:hasBadge
   if leaderInfo and leaderInfo.badge and self.hasBadge then
     local ok, has = pcall(self.hasBadge, self, leaderInfo.badge)
     if ok and has then return true end
@@ -547,26 +737,18 @@ local function isTrainerDefeated(self, npc, info)
     end
   end
 
-  -- 4. Check save.player.badges or save.badges table or save.engineFlags
+  -- 4. The leader's badge, in whichever store this save keeps it
+  if leaderInfo and leaderInfo.badge and badgeOwned(self, leaderInfo.badge) == true then
+    return true
+  end
+
+  -- 5. Gen 1 numeric bitmask badges
   local save = (self.game and self.game.save) or self.save
   if not save then
     local ok, Game = pcall(require, "src.core.Game")
     if ok and Game and Game.save then save = Game.save end
   end
-
   local badges = save and ((save.player and save.player.badges) or save.badges)
-  if save and leaderInfo then
-    if badges and leaderInfo.badge then
-      if type(badges) == "table" and (badges[leaderInfo.badge] or badges[leaderInfo.badge:upper()]) then
-        return true
-      end
-    end
-    if save.engineFlags and leaderInfo.engineFlag then
-      if save.engineFlags[leaderInfo.engineFlag] then return true end
-    end
-  end
-
-  -- 5. Gen 1 numeric bitmask badges
   if save and norm then
     local GEN1_BADGE_BITS = {
       BROCK = 1, MISTY = 2, LT_SURGE = 4, LTSURGE = 4,
@@ -596,6 +778,9 @@ return function(mod)
   mod.exports.resolveParty = resolveParty
   mod.exports.extractTrainerInfo = extractTrainerInfo
   mod.exports.isTrainerDefeated = isTrainerDefeated
+  mod.exports.resolveLeader = resolveLeader
+  mod.exports.badgeOwned = badgeOwned
+  mod.exports.talkStillHandsOver = talkStillHandsOver
 
   -- rematch earnings: a percentage of the usual battle money and
   -- experience, stepped in 10% intervals.  Money defaults to 0% (the
@@ -735,7 +920,10 @@ return function(mod)
           local scripted = mapScripts and mapScripts.talkScript
               and mapScripts.talkScript(self.map and self.map.id, d.text)
           local hasDedicatedRematch = resolvePartyIndex(info.classRecord, nil) ~= nil
-          if not scripted or hasDedicatedRematch or d.scriptKey or self.startTrainerScript then
+          -- a leader who still owes a badge or a TM keeps the talk: the
+          -- rematch prompt must not eat the only script that hands it over
+          if not leaderStillHandingOver(self, activeGame, info.classId, d)
+              and (not scripted or hasDedicatedRematch or d.scriptKey or self.startTrainerScript) then
             return offerRematch(self, npc, activeGame, deps)
           end
         end

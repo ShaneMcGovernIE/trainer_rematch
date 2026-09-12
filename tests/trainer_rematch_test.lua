@@ -660,6 +660,248 @@ local talkReturned = overworldStub.talkTo(falknerOwUndefeated, falknerNpc)
 T.eq(#pushed, 0, "no rematch prompt for undefeated Falkner")
 T.neq(talkReturned, true, "falls through to vanilla script for undefeated Falkner")
 
+-- ------------------- Gym Leaders: badge and TM still to be handed over
+
+-- A beaten Gym Leader is not finished with the player.  The battle only sets
+-- EVENT_BEAT_<leader>; the badge (and usually a TM) comes from their own talk
+-- afterwards.  Whitney is the plain case -- she cries until the trip-wire at
+-- (8,5) clears event 40, and only then does the badge talk run -- and taking
+-- that talk for the rematch prompt left players with no way to get PLAINBADGE.
+-- These shapes are the real ones from the crystal cache, trimmed to the ops
+-- that decide the branch.
+local WHITNEY_SCRIPTS = {
+  ["15:400c"] = {
+    { op = "faceplayer" },
+    { op = "checkevent", event = 1215 },
+    { op = "iftrue", script = "15:4037" },
+    { op = "opentext" },
+    { op = "writetext", text = "15:4122" },
+    { op = "waitbutton" },
+    { op = "closetext" },
+    { op = "loadtrainer", class = 2, member = 1 },
+    { op = "startbattle" },
+    { op = "end" },
+  },
+  ["15:4037"] = {
+    { op = "opentext" },
+    { op = "checkevent", event = 40 },
+    { op = "iffalse", script = "15:4044" },
+    { op = "writetext", text = "15:41f4" },   -- the crying line
+    { op = "waitbutton" },
+    { op = "closetext" },
+    { op = "end" },
+  },
+  ["15:4044"] = {
+    { op = "checkevent", event = 11 },
+    { op = "iftrue", script = "15:4077" },
+    { op = "checkflag", flag = 29 },          -- ENGINE_PLAINBADGE
+    { op = "iftrue", script = "15:4064" },
+    { op = "writetext", text = "15:4222" },
+    { op = "promptbutton" },
+    { op = "setflag", flag = 29 },
+    { op = "readvar", var = 7 },
+    { op = "scall", script = "15:407d" },
+    { op = "writetext", text = "15:428b" },
+    { op = "promptbutton" },
+    { op = "verbosegiveitem", item = 237, quantity = 1 },
+    { op = "iffalse", script = "15:407b" },
+    { op = "setevent", event = 11 },
+    { op = "writetext", text = "15:4302" },
+    { op = "waitbutton" },
+    { op = "closetext" },
+    { op = "end" },
+  },
+  ["15:4064"] = {                             -- badge in hand, TM still to come
+    { op = "writetext", text = "15:428b" },
+    { op = "promptbutton" },
+    { op = "verbosegiveitem", item = 237, quantity = 1 },
+    { op = "iffalse", script = "15:407b" },
+    { op = "setevent", event = 11 },
+    { op = "writetext", text = "15:4302" },
+    { op = "waitbutton" },
+    { op = "closetext" },
+    { op = "end" },
+  },
+  ["15:4077"] = {                             -- badge and TM both taken
+    { op = "writetext", text = "15:4360" },
+    { op = "waitbutton" },
+    { op = "closetext" },
+    { op = "end" },
+  },
+  ["15:407b"] = { { op = "closetext" }, { op = "end" } },
+  ["15:407d"] = { { op = "end" } },
+}
+
+-- PEWTER_GYM's Brock: a checkflag guard, no TM, and the badge on the Kanto
+-- store, which is the shape that proves both stores are read.
+local BROCK_SCRIPTS = {
+  ["68:6864"] = {
+    { op = "faceplayer" },
+    { op = "opentext" },
+    { op = "checkflag", flag = 35 },          -- ENGINE_BOULDERBADGE
+    { op = "iftrue", script = "68:6892" },
+    { op = "writetext", text = "68:68d0" },
+    { op = "loadtrainer", member = 1, class = 17 },
+    { op = "startbattle" },
+    { op = "end" },
+  },
+  ["68:6892"] = {
+    { op = "writetext", text = "68:6ada" },
+    { op = "waitbutton" },
+    { op = "closetext" },
+    { op = "end" },
+  },
+}
+
+local GYM_CLASSES = {
+  WHITNEY = { id = "WHITNEY", name = "WHITNEY", index = 2,
+    trainers = { { id = "WHITNEY1", name = "WHITNEY",
+      party = { { level = 18, species = "CLEFAIRY" },
+                { level = 20, species = "MILTANK" } } } } },
+  BROCK = { id = "BROCK", name = "BROCK", index = 17,
+    trainers = { { id = "BROCK1", name = "BROCK",
+      party = { { level = 44, species = "GRAVELER" } } } } },
+  LASS = { id = "LASS", name = "LASS", index = 25,
+    trainers = { { id = "LASS1", name = "LASS",
+      party = { { level = 22, species = "SNUBBULL" } } } } },
+}
+
+-- one overworld per case: a fresh save (so no case leaks a badge into the
+-- next), the script pool, an Events stub, and the ENGINE_*BADGE ids
+-- World:engineFlag answers for crystal (29 is PLAIN, 35 is BOULDER).
+local function gymOverworld(opts)
+  local game = {
+    data = { trainers = { classes = GYM_CLASSES } },
+    save = { party = { { level = 30 } },
+             player = { badges = opts.badges or {}, kantoBadges = opts.kantoBadges or {} } },
+    stack = { push = function(_, s) table.insert(pushed, s) end },
+  }
+  local FLAG_BADGE = {
+    [29] = { store = "badges", name = "PLAIN" },
+    [35] = { store = "kantoBadges", name = "BOULDER" },
+  }
+  return {
+    game = game,
+    map = { id = "GOLDENROD_GYM", def = { label = "GoldenrodGym" } },
+    player = {},
+    scripts = opts.scripts,
+    events = { get = function(_, ev) return (opts.events or {})[ev] == true end },
+    engineFlag = function(_, flag)
+      local row = FLAG_BADGE[flag]
+      if not row then return false end
+      return game.save.player[row.store][row.name] == true
+    end,
+    trainerBeaten = function(self, record)
+      -- matches the engine: a Gym Leader object carries no trainer record
+      if not (record and record.event) then return false end
+      return (opts.events or {})[record.event] == true
+    end,
+    startTrainerScript = function(self, npc, script)
+      gen2StartedScript = script
+      return true
+    end,
+  }
+end
+
+local whitneyNpc = {
+  def = { sprite = "SPRITE_WHITNEY", scriptKey = "15:400c", index = 1 },
+  frozen = false,
+  facePlayer = function() end,
+}
+
+-- A: beaten but the badge is still owed -> Whitney keeps her own talk
+calls.vanillaTalk = 0
+pushed = {}
+local whitneyOw = gymOverworld({ scripts = WHITNEY_SCRIPTS, events = { [1215] = true } })
+T.eq(ex.isTrainerDefeated(whitneyOw, whitneyNpc,
+  ex.extractTrainerInfo(whitneyNpc, whitneyOw.game, whitneyOw)), true,
+  "the battle event alone still reads as defeated")
+overworldStub.talkTo(whitneyOw, whitneyNpc)
+T.eq(#pushed, 0, "no rematch prompt while Whitney still owes the badge")
+T.eq(calls.vanillaTalk, 1, "the badge talk falls through to the vanilla script")
+
+-- B: the crying stage (event 40 still armed, badge unowned) keeps its talk too
+calls.vanillaTalk = 0
+pushed = {}
+overworldStub.talkTo(gymOverworld({ scripts = WHITNEY_SCRIPTS,
+  events = { [1215] = true, [40] = true } }), whitneyNpc)
+T.eq(#pushed, 0, "no rematch prompt during the crying scene")
+T.eq(calls.vanillaTalk, 1, "the crying talk falls through to the vanilla script")
+
+-- C: badge in hand but the TM is still owed -> the TM talk is still hers
+calls.vanillaTalk = 0
+pushed = {}
+overworldStub.talkTo(gymOverworld({ scripts = WHITNEY_SCRIPTS, badges = { PLAIN = true },
+  events = { [1215] = true } }), whitneyNpc)
+T.eq(#pushed, 0, "no rematch prompt while Whitney still owes the TM")
+T.eq(calls.vanillaTalk, 1, "the TM talk falls through to the vanilla script")
+
+-- D: badge and TM both in hand, the script is pure talk -> rematch offered
+calls.vanillaTalk = 0
+pushed = {}
+gen2StartedScript = nil
+overworldStub.talkTo(gymOverworld({ scripts = WHITNEY_SCRIPTS, badges = { PLAIN = true },
+  events = { [1215] = true, [11] = true } }), whitneyNpc)
+T.eq(#pushed, 1, "rematch prompt offered once Whitney is finished with you")
+T.eq(pushed[1].text, ex.resolveLine("WHITNEY"), "shows Whitney's challenge line")
+pushed[1].opts.choice(true)
+T.neq(gen2StartedScript, nil, "accepting starts Whitney's rematch battle")
+T.eq(gen2StartedScript[1].class, 2, "the rematch loads Whitney's numeric class")
+T.eq(gen2StartedScript[1].member, 1, "the rematch loads member 1")
+
+-- E: a Kanto leader reads save.player.kantoBadges
+local brockNpc = {
+  def = { sprite = "SPRITE_BROCK", scriptKey = "68:6864", index = 1 },
+  frozen = false,
+  facePlayer = function() end,
+}
+calls.vanillaTalk = 0
+pushed = {}
+overworldStub.talkTo(gymOverworld({ scripts = BROCK_SCRIPTS,
+  events = { [1221] = true } }), brockNpc)
+T.eq(#pushed, 0, "no rematch prompt before Brock's badge is handed over")
+T.eq(calls.vanillaTalk, 1, "Brock's badge talk stays with the vanilla script")
+
+pushed = {}
+overworldStub.talkTo(gymOverworld({ scripts = BROCK_SCRIPTS, kantoBadges = { BOULDER = true },
+  events = { [1221] = true } }), brockNpc)
+T.eq(#pushed, 1, "rematch prompt offered once the Kanto badge is in hand")
+
+-- F: a field trainer in the same gym is untouched by the leader gate
+pushed = {}
+local lassNpc = {
+  def = { trainer = { class = 25, member = 1, event = 1301 },
+          scriptKey = "15:4098", index = 2 },
+  frozen = false,
+  facePlayer = function() end,
+}
+overworldStub.talkTo(gymOverworld({ scripts = WHITNEY_SCRIPTS,
+  events = { [1301] = true } }), lassNpc)
+T.eq(#pushed, 1, "a beaten gym trainer still gets the rematch prompt")
+
+-- G: the pieces the gate is built from
+T.eq(ex.resolveLeader("OPP_WHITNEY"), ex.resolveLeader("WHITNEY"),
+  "resolveLeader normalises the OPP_ prefix")
+T.eq(ex.resolveLeader("OPP_FIX_YOUNGSTER"), nil, "non-leader classes resolve to nil")
+T.eq(ex.badgeOwned({ game = { save = { player = { badges = { PLAIN = true } } } } }, "PLAIN"),
+  true, "badgeOwned reads the Johto store by name")
+T.eq(ex.badgeOwned({ game = { save = { player = { badges = { [3] = true } } } } }, "PLAIN"),
+  true, "badgeOwned accepts the badge's bit position")
+T.eq(ex.badgeOwned({ game = { save = { player = { badges = {} } } } }, "PLAIN"),
+  false, "badgeOwned reports a missing badge as false")
+T.eq(ex.badgeOwned({ game = { save = { player = { kantoBadges = { BOULDER = true } } } } }, "BOULDER"),
+  true, "badgeOwned reads the Kanto store too")
+T.eq(ex.badgeOwned({ game = { save = { inventory = { BOULDERBADGE = true } } } }, "BOULDER"),
+  true, "badgeOwned reads Gen 1 badges out of the bag")
+T.eq(ex.badgeOwned({ game = { save = {} } }, "PLAIN"), nil,
+  "badgeOwned answers nil when there is no store to read")
+T.eq(ex.talkStillHandsOver(WHITNEY_SCRIPTS["15:4044"], WHITNEY_SCRIPTS, {
+  check = function() return false end }), true,
+  "a hand-over the flags have not satisfied yet counts as unfinished")
+T.eq(ex.talkStillHandsOver(WHITNEY_SCRIPTS["15:4077"], WHITNEY_SCRIPTS, {
+  check = function() return false end }), false,
+  "a pure talk has nothing left to hand over")
+
 run.release()
 T.finish("trainer_rematch")
 

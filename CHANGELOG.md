@@ -2,6 +2,32 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.4] - 2026-09-12
+
+### Fixed
+
+- **Gym Leaders still owe you their badge or TM**: a beaten Gym Leader on
+  Gold/Silver/Crystal is not finished when the battle ends. The battle only
+  sets `EVENT_BEAT_<leader>`, and their own talk afterwards hands the badge
+  over -- Whitney cries and blocks the door until the trip-wire at (8,5)
+  clears event 40, so `PLAINBADGE` only comes from the *next* talk, and
+  Clair's `RISINGBADGE` comes from the Dragon's Den elder. The rematch prompt
+  was taking that talk, which left players with no way to get the badge at all
+  (they had to disable the mod, talk to the leader, and re-enable it; with this
+  version, talking to the leader again hands it over).
+  A Leader who still owes the player their badge now keeps their own
+  conversation, and so does one who is only owed their TM -- Falkner, Bugsy,
+  Morty, Chuck, Jasmine and Pryce re-offer theirs when the party was full, and
+  Erika, Janine and Clair hand theirs over on a later talk. Once the hand-over
+  is done the class offers a rematch exactly as before.
+- **Badge reading across saves**: the badge is now looked for in the store the
+  save actually uses -- `save.player.badges` (Johto), `save.player.kantoBadges`
+  (Kanto), by name with the badge's bit position as the fallback, or Gen 1's
+  bag item -- instead of only `save.player.badges` by name. The hard-coded
+  `ENGINE_*BADGE` numbers are gone: that numbering shifts between Gold and
+  Crystal (Crystal's `PLAINBADGE` is 29, not 28), and the engine already keeps
+  a badge and its engine flag in one store.
+
 ## [0.5.3] - 2026-08-27
 
 ### Fixed

@@ -12,7 +12,7 @@ Talk to any trainer you have already beaten and they challenge you to a rematch,
 
 If the rematch team averages **more than 10 levels above your party**, they warn you first in their own voice and ask again — say YES to battle anyway, or NO to walk away.
 
-Gym leaders, rivals and other scripted encounters keep their original conversations — except that a class which marks a dedicated rematch team (a `rematchIndex` in its trainer record, like the Yellow Legacy Changes mod ships for the gym leaders, Elite Four and Champion) uses that team for the rematch instead of the trainer's own party.
+Gym leaders, rivals and other scripted encounters keep their original conversations. A Gym Leader only starts offering rematches once they have nothing left to hand over: beating them in Gen 2 only sets the "beaten" flag, and the badge (and often their TM) comes from their own talk afterwards, so that talk is theirs until the badge and TM are in your hands. A class which marks a dedicated rematch team (a `rematchIndex` in its trainer record, like the Yellow Legacy Changes mod ships for the gym leaders, Elite Four and Champion) uses that team for the rematch instead of the trainer's own party.
 
 ## Try it
 

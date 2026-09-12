@@ -14,7 +14,7 @@ return {
       "A unique decline line for every trainer class",
     },
     known = {
-      "Scripted encounters (gym leaders, rivals, story fights) keep their original flows",
+      "Scripted encounters (gym leaders, rivals, story fights) keep their original flows; a Gym Leader only offers rematches once their badge and TM are in your hands",
       "The trainer's vanilla post-battle dialogue still follows the decline reaction",
     },
   },
